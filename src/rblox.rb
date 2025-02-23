@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'utils/string_colors'
+require_relative 'lexical_analysis'
 
 class Lox
   class << self
@@ -65,8 +66,11 @@ class Lox
 end
 
 # Call main method with command-line arguments
-Lox.main(ARGV)
+# Lox.main(ARGV)
 
 # Example Usage:
-Lox.error(10, 'Unexpected character')
-puts Lox.had_error # => true
+# Lox.error(10, 'Unexpected character')
+# puts Lox.had_error # => true
+
+la = LexicalAnalysis.new("2+2")
+puts la.scan_tokens
