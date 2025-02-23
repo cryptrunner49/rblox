@@ -1,19 +1,22 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'readline'
+
 require_relative 'lexical/analyzer'
 require_relative 'syntax/parser'
 require_relative 'syntax/expr'
 require_relative 'utils/string_colors'
+require_relative '../../generator/ast_printer'
 
 module Lox
   class Interpreter
     class << self
       attr_accessor :had_error
 
-      EXIT_MESSAGE = "\nExiting rblox. Goodbye!".freeze
-
       @had_error = false
+
+      EXIT_MESSAGE = "\nExiting rblox. Goodbye!"
 
       def main(args)
         if args.length > 1
@@ -39,7 +42,7 @@ module Lox
           loop do
             print 'rblox>> '.red
             line = gets&.chomp
-            break if line.nil? || line.empty? || line = "exit" || line == "exit!" || line == "quit"
+            break if line.nil? || line.empty? || line == 'exit' || line == 'exit!' || line == 'quit'
 
             run(line)
             false
@@ -53,24 +56,32 @@ module Lox
       end
 
       def run(source)
-        analyzer = Lox::Lexical::Analyzer.new(source)
+        analyzer = Lexical::Analyzer.new(source)
         tokens = analyzer.scan_tokens
-        parser = Lox::Parser.new(tokens)
-        tokens.each { |token| puts token }
-        # TODO: Replace with parser.parse once implemented
-        # expr = parser.parse
-        # puts expr.inspect
+        parser = Syntax::Parser.new(tokens)
+        expression = parser.parse
+
+        if expression.nil?
+          @had_error = true
+          return
+        end
+
+        puts Generator::AstPrinter.new.print(expression)
+        expression
       end
 
-      def error(line, message)
-        report(line, '', message)
+      def error(token, message)
+        if token.type == TokenType::EOF
+          report(token.line, ' at end', message)
+        else
+          report(token.line, " at '#{token.lexeme}'", message)
+        end
       end
 
       private
 
       def report(line, where, message)
         warn "[line #{line}] Error#{where}: #{message}"
-        @had_error = true
       end
     end
   end

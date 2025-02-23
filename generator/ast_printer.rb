@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative "../src/lox/lexical/token"
-require_relative "../src/lox/lexical/token_type"
-require_relative "../src/lox/syntax/expr"
+require_relative '../src/lox/lexical/token'
+require_relative '../src/lox/lexical/token_type'
+require_relative '../src/lox/syntax/expr'
 
 module Generator
   class AstPrinter
@@ -15,11 +15,11 @@ module Generator
     end
 
     def visit_grouping_expr(expr)
-      parenthesize("group", expr.expression)
+      parenthesize('group', expr.expression)
     end
 
     def visit_literal_expr(expr)
-      expr.value.nil? ? "nil" : expr.value.to_s
+      expr.value.nil? ? 'nil' : expr.value.to_s
     end
 
     def visit_unary_expr(expr)
@@ -34,13 +34,13 @@ module Generator
   end
 end
 
-if __FILE__ == $0
+if __FILE__ == $PROGRAM_NAME
   expression = Lox::Expr::Binary.new(
     Lox::Expr::Unary.new(
-      Lox::Lexical::Token.new(Lox::Lexical::TokenType::MINUS, "-", nil, 1),
+      Lox::Lexical::Token.new(Lox::Lexical::TokenType::MINUS, '-', nil, 1),
       Lox::Expr::Literal.new(123)
     ),
-    Lox::Lexical::Token.new(Lox::Lexical::TokenType::STAR, "*", nil, 1),
+    Lox::Lexical::Token.new(Lox::Lexical::TokenType::STAR, '*', nil, 1),
     Lox::Expr::Grouping.new(
       Lox::Expr::Literal.new(45.67)
     )
