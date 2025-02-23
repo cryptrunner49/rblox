@@ -2,6 +2,8 @@
 # frozen_string_literal: true
 
 require_relative 'lexical/analyzer'
+require_relative 'syntax/parser'
+require_relative 'syntax/expr'
 require_relative 'utils/string_colors'
 
 module Lox
@@ -53,7 +55,11 @@ module Lox
       def run(source)
         analyzer = Lox::Lexical::Analyzer.new(source)
         tokens = analyzer.scan_tokens
+        parser = Lox::Parser.new(tokens)
         tokens.each { |token| puts token }
+        # TODO: Replace with parser.parse once implemented
+        # expr = parser.parse
+        # puts expr.inspect
       end
 
       def error(line, message)
