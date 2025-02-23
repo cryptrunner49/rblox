@@ -31,18 +31,27 @@ module Lox
       def run_prompt
         puts 'rblox 0.0.1'
         puts 'CTRL+C to quit'
-        loop do
-          print 'rblox>> '.red
-          line = gets&.chomp
-          break if line.nil? || line.empty?
+        begin
+          loop do
+            print 'rblox>> '.red
+            line = gets&.chomp
+            break if line.nil? || line.empty? || line = "exit" || line == "exit!" || line == "quit"
 
-          run(line)
-          false
+            run(line)
+            false
+          end
+        rescue Interrupt
+          puts "\n"
+        ensure
+          puts "\nExiting rblox. Goodbye!"
+          exit(0)
         end
       end
 
-      def run(_source)
-        # Placeholder for execution logic
+      def run(source)
+        analyzer = Lox::Lexical::Analyzer.new(source)
+        tokens = analyzer.scan_tokens
+        tokens.each { |token| puts token }
       end
 
       def error(line, message)
@@ -59,12 +68,4 @@ module Lox
   end
 end
 
-# Example usage at the bottom of the file or in a separate main.rb:
-# Lox::Interpreter.main(ARGV)
-
-# Example usage:
-# Lox::Interpreter.error(10, 'Unexpected character')
-# puts Lox::Interpreter.had_error # => true
-
-analyzer = Lox::Lexical::Analyzer.new(ARGV[0])
-puts analyzer.scan_tokens
+Lox::Interpreter.main(ARGV)
