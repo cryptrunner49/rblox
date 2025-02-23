@@ -9,6 +9,8 @@ module Lox
     class << self
       attr_accessor :had_error
 
+      EXIT_MESSAGE = "\nExiting rblox. Goodbye!".freeze
+
       @had_error = false
 
       def main(args)
@@ -30,7 +32,7 @@ module Lox
 
       def run_prompt
         puts 'rblox 0.0.1'
-        puts 'CTRL+C to quit'
+        puts 'CTRL+C or CTRL+D (CTRL+Z on Windows) to quit'
         begin
           loop do
             print 'rblox>> '.red
@@ -43,7 +45,7 @@ module Lox
         rescue Interrupt
           puts "\n"
         ensure
-          puts "\nExiting rblox. Goodbye!"
+          puts EXIT_MESSAGE
           exit(0)
         end
       end
