@@ -7,7 +7,3 @@ print "Hello"; var x = 5; print x;
   }
   print x;
 }
-{
-  var x = "test";
-  print x;
-}

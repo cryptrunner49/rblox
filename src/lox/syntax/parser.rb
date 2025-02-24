@@ -93,12 +93,12 @@ module Lox
       def block
         statements = []
         while !check(Lox::Lexical::TokenType::RIGHT_BRACE) && !at_end?
-          stmt = declaration
-          statements << stmt if stmt # Filter nil statements
+          stmt = statement
+          statements << stmt if stmt
         end
         consume(Lox::Lexical::TokenType::RIGHT_BRACE, "Expect '}' after block.")
         statements
-      end
+      end      
 
       def equality
         expr = comparison
