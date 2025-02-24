@@ -8,6 +8,10 @@ module Lox
   module Syntax
     class Expr
       module Visitor
+        def visit_assign_expr(expr)
+          raise NotImplementedError, 'Must implement visit_assign_expr'
+        end
+
         def visit_binary_expr(expr)
           raise NotImplementedError, 'Must implement visit_binary_expr'
         end
@@ -23,10 +27,29 @@ module Lox
         def visit_unary_expr(expr)
           raise NotImplementedError, 'Must implement visit_unary_expr'
         end
+
+        def visit_variable_expr(expr)
+          raise NotImplementedError, 'Must implement visit_variable_expr'
+        end
       end
 
       def accept(visitor)
         raise NotImplementedError, 'Subclasses must implement accept'
+      end
+
+      class Assign < Expr
+        # @name : Token
+        # @value : Expr
+        attr_reader :name, :value
+
+        def initialize(name, value)
+          @name = name
+          @value = value
+        end
+
+        def accept(visitor)
+          visitor.visit_assign_expr(self)
+        end
       end
 
       class Binary < Expr
@@ -84,6 +107,19 @@ module Lox
 
         def accept(visitor)
           visitor.visit_unary_expr(self)
+        end
+      end
+
+      class Variable < Expr
+        # @name : Token
+        attr_reader :name
+
+        def initialize(name)
+          @name = name
+        end
+
+        def accept(visitor)
+          visitor.visit_variable_expr(self)
         end
       end
     end

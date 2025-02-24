@@ -69,20 +69,23 @@ module Lox
       end
 
       def run(source)
+        puts "Processing source: #{source}"  # Debug input
         analyzer = Lexical::Analyzer.new(source)
         tokens = analyzer.scan_tokens
+        puts "Tokens: #{tokens.map(&:to_s)}"  # Debug tokens
+
         parser = Syntax::Parser.new(tokens)
         statements = parser.parse
-
+        
         if statements.nil?
+          puts "Parse error occurred"  # Debug parse failure
           @had_error = true
           return
         end
 
+        puts "Statements parsed: #{statements.map(&:inspect)}"  # Debug statements
         evaluator = Interpreter::ExpressionEvaluator.new
-        statements.each do |stmt|
-          stmt.accept(evaluator)
-        end
+        evaluator.interpret(statements)
       end
 
       def error(token, message)

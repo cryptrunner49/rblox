@@ -7,6 +7,7 @@ require_relative 'stmt'
 
 module Lox
   module Syntax
+    # Simplified namespace to match structure
     class Parser
       class ParseError < StandardError; end
 
@@ -31,9 +32,31 @@ module Lox
       attr_accessor :current
 
       def statement
-        return print_statement if match(Lox::Lexical::TokenType::PRINT)
+        if match(Lox::Lexical::TokenType::PRINT)
+          print_statement
+        elsif match(Lox::Lexical::TokenType::LEFT_BRACE)
+          Syntax::Stmt::Block.new(block)
+        else
+          declaration # Now includes VAR or falls to expression_statement
+        end
+      end
 
-        expression_statement
+      def declaration
+        if match(Lox::Lexical::TokenType::VAR)
+          var_declaration
+        else
+          expression_statement # Break recursion by using expression_statement directly
+        end
+      rescue ParseError
+        synchronize
+        nil
+      end
+
+      def var_declaration
+        name = consume(Lox::Lexical::TokenType::IDENTIFIER, 'Expect variable name.')
+        initializer = match(Lox::Lexical::TokenType::EQUAL) ? expression : nil
+        consume(Lox::Lexical::TokenType::SEMICOLON, "Expect ';' after variable declaration.")
+        Syntax::Stmt::Var.new(name, initializer)
       end
 
       def print_statement
@@ -49,7 +72,26 @@ module Lox
       end
 
       def expression
-        equality
+        assignment
+      end
+
+      def assignment
+        expr = equality
+        if match(Lox::Lexical::TokenType::EQUAL)
+          equals = previous
+          value = assignment
+          return Syntax::Expr::Assign.new(expr.name, value) if expr.is_a?(Syntax::Expr::Variable)
+
+          error(equals, 'Invalid assignment target.')
+        end
+        expr
+      end
+
+      def block
+        statements = []
+        statements << declaration while !check(Lox::Lexical::TokenType::RIGHT_BRACE) && !at_end?
+        consume(Lox::Lexical::TokenType::RIGHT_BRACE, "Expect '}' after block.")
+        statements
       end
 
       def equality
@@ -57,7 +99,7 @@ module Lox
         while match(Lox::Lexical::TokenType::BANG_EQUAL, Lox::Lexical::TokenType::EQUAL_EQUAL)
           operator = previous
           right = comparison
-          expr = Expr::Binary.new(expr, operator, right)
+          expr = Syntax::Expr::Binary.new(expr, operator, right)
         end
         expr
       end
@@ -68,7 +110,7 @@ module Lox
                     Lox::Lexical::TokenType::LESS, Lox::Lexical::TokenType::LESS_EQUAL)
           operator = previous
           right = term
-          expr = Expr::Binary.new(expr, operator, right)
+          expr = Syntax::Expr::Binary.new(expr, operator, right)
         end
         expr
       end
@@ -78,7 +120,7 @@ module Lox
         while match(Lox::Lexical::TokenType::MINUS, Lox::Lexical::TokenType::PLUS)
           operator = previous
           right = factor
-          expr = Expr::Binary.new(expr, operator, right)
+          expr = Syntax::Expr::Binary.new(expr, operator, right)
         end
         expr
       end
@@ -88,7 +130,7 @@ module Lox
         while match(Lox::Lexical::TokenType::SLASH, Lox::Lexical::TokenType::STAR)
           operator = previous
           right = unary
-          expr = Expr::Binary.new(expr, operator, right)
+          expr = Syntax::Expr::Binary.new(expr, operator, right)
         end
         expr
       end
@@ -97,24 +139,26 @@ module Lox
         if match(Lox::Lexical::TokenType::BANG, Lox::Lexical::TokenType::MINUS)
           operator = previous
           right = unary
-          return Expr::Unary.new(operator, right)
+          return Syntax::Expr::Unary.new(operator, right)
         end
         primary
       end
 
       def primary
         if match(Lox::Lexical::TokenType::FALSE)
-          return Expr::Literal.new(false)
+          return Syntax::Expr::Literal.new(false)
         elsif match(Lox::Lexical::TokenType::TRUE)
-          return Expr::Literal.new(true)
+          return Syntax::Expr::Literal.new(true)
         elsif match(Lox::Lexical::TokenType::NIL)
-          return Expr::Literal.new(nil)
+          return Syntax::Expr::Literal.new(nil)
         elsif match(Lox::Lexical::TokenType::NUMBER, Lox::Lexical::TokenType::STRING)
-          return Expr::Literal.new(previous.literal)
+          return Syntax::Expr::Literal.new(previous.literal)
+        elsif match(Lox::Lexical::TokenType::IDENTIFIER)
+          return Syntax::Expr::Variable.new(previous)
         elsif match(Lox::Lexical::TokenType::LEFT_PAREN)
           expr = expression
           consume(Lox::Lexical::TokenType::RIGHT_PAREN, "Expect ')' after expression.")
-          return Expr::Grouping.new(expr)
+          return Syntax::Expr::Grouping.new(expr)
         end
 
         raise error(peek, 'Expect expression.')

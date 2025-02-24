@@ -8,6 +8,10 @@ module Lox
   module Syntax
     class Stmt
       module Visitor
+        def visit_block_stmt(expr)
+          raise NotImplementedError, 'Must implement visit_block_stmt'
+        end
+
         def visit_expression_stmt(expr)
           raise NotImplementedError, 'Must implement visit_expression_stmt'
         end
@@ -15,10 +19,27 @@ module Lox
         def visit_print_stmt(expr)
           raise NotImplementedError, 'Must implement visit_print_stmt'
         end
+
+        def visit_var_stmt(expr)
+          raise NotImplementedError, 'Must implement visit_var_stmt'
+        end
       end
 
       def accept(visitor)
         raise NotImplementedError, 'Subclasses must implement accept'
+      end
+
+      class Block < Stmt
+        # @statements : List<Stmt>
+        attr_reader :statements
+
+        def initialize(statements)
+          @statements = statements
+        end
+
+        def accept(visitor)
+          visitor.visit_block_stmt(self)
+        end
       end
 
       class Expression < Stmt
@@ -44,6 +65,21 @@ module Lox
 
         def accept(visitor)
           visitor.visit_print_stmt(self)
+        end
+      end
+
+      class Var < Stmt
+        # @name : Token
+        # @initializer : Expr
+        attr_reader :name, :initializer
+
+        def initialize(name, initializer)
+          @name = name
+          @initializer = initializer
+        end
+
+        def accept(visitor)
+          visitor.visit_var_stmt(self)
         end
       end
     end

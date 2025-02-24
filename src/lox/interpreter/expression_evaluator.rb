@@ -1,18 +1,27 @@
 # frozen_string_literal: true
 
 require_relative '../syntax/expr'
+require_relative '../syntax/stmt'
 require_relative '../lexical/token_type'
+require_relative 'environment'
 
 module Lox
   module Interpreter
     class ExpressionEvaluator
-      def interpret(expression)
-        value = evaluate(expression)
-        puts stringify(value)
-      rescue Lox::RuntimeError => e
-        Lox::Runner.runtime_error(e)
+      def initialize
+        @environment = Interpreter::Environment.new
       end
 
+      def interpret(statements)
+        statements.each do |statement|
+          execute(statement)
+        end
+      rescue Lox::RuntimeError => e
+        Lox::Runner.runtime_error(e)
+        nil # Return nil to indicate failure
+      end
+
+      # Expr Visitor Methods
       def visit_literal_expr(expr)
         expr.value
       end
@@ -76,14 +85,36 @@ module Lox
         end
       end
 
-      def visit_print_stmt(stmt)
-        value = evaluate(stmt.expression)
-        puts stringify(value)
+      def visit_variable_expr(expr)
+        @environment.get(expr.name)
+      end
+
+      def visit_assign_expr(expr)
+        value = evaluate(expr.value)
+        @environment.assign(expr.name, value)
+        value
+      end
+
+      # Stmt Visitor Methods
+      def visit_expression_stmt(stmt)
+        evaluate(stmt.expression) # No output, just evaluation
         nil
       end
 
-      def visit_expression_stmt(stmt)
-        evaluate(stmt.expression)
+      def visit_print_stmt(stmt)
+        value = evaluate(stmt.expression)
+        puts stringify(value) # Ensure this prints to stdout
+        nil
+      end
+
+      def visit_var_stmt(stmt)
+        value = stmt.initializer ? evaluate(stmt.initializer) : nil
+        @environment.define(stmt.name.lexeme, value)
+        nil
+      end
+
+      def visit_block_stmt(stmt)
+        execute_block(stmt.statements, Lox::Environment.new(@environment))
         nil
       end
 
@@ -91,6 +122,20 @@ module Lox
 
       def evaluate(expr)
         expr.accept(self)
+      end
+
+      def execute(stmt)
+        stmt.accept(self)
+      end
+
+      def execute_block(statements, environment)
+        previous = @environment
+        begin
+          @environment = environment
+          statements.each { |statement| execute(statement) }
+        ensure
+          @environment = previous
+        end
       end
 
       def is_truthy(object)
@@ -101,13 +146,10 @@ module Lox
       end
 
       def is_equal(a, b)
-        if a.nil? && b.nil?
-          true
-        elsif a.nil?
-          false
-        else
-          a == b
-        end
+        return true if a.nil? && b.nil?
+        return false if a.nil?
+
+        a == b
       end
 
       def check_number_operand(operator, operand)
