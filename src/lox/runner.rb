@@ -38,6 +38,7 @@ module Lox
         content = File.read(file_path, encoding: 'UTF-8')
         run(content)
         exit(65) if Runner.had_error
+        exit(70) if Runner.had_runtime_error
       end
 
       def run_prompt
@@ -73,7 +74,7 @@ module Lox
           puts EXIT_MESSAGE
           exit(0)
         end
-      end      
+      end
 
       def run(source)
         #puts "Processing source: #{source}"
@@ -108,10 +109,18 @@ module Lox
 
       private
 
-      def report(line, where, message)
-        warn "[line #{line}] Error#{where}: #{message}"
-      end
+      #def report(line, where, message)
+     #   source_line = @source.split("\n")[line - 1]
+     #   warn "[line #{line}] Error#{where}: #{message}"
+      #  warn "  #{source_line}"
+      #  warn "  " + (" " * (where.to_i - 1)) + "^"
+      #end
 
+      def report(line, where, message)
+        STDERR.puts "[line #{line}] Error#{where}: #{message}".yellow
+        @had_error = true
+      end
+      
       def runtime_error(error)
         warn "#{error.message}\n[line #{error.token.line}]"
         @had_runtime_error = true
