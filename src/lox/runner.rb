@@ -86,7 +86,7 @@ module Lox
         statements = parser.parse
 
         if statements.nil?
-          puts 'Parse error occurred'
+          puts "[Parse Error] Invalid syntax detected"
           @had_error = true
           return
         end
@@ -96,7 +96,11 @@ module Lox
 
         # Use a persistent interpreter instance.
         @interpreter ||= Interpreter::ExpressionEvaluator.new
-        @interpreter.interpret(statements)
+        begin
+          @interpreter.interpret(statements)
+        rescue Lox::RuntimeError => e
+          runtime_error(e)
+        end
       end
 
       def error(token, message)
@@ -129,4 +133,4 @@ module Lox
   end
 end
 
-Lox::Runner.main(ARGV)
+Lox::Runner.main(ARGV) if $PROGRAM_NAME == __FILE__
