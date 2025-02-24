@@ -1,1 +1,1 @@
-10 + 5;
+print "Hello"; var x = 5; print x;

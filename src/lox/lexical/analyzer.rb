@@ -8,7 +8,7 @@ module Lox
     class Analyzer
       attr_reader :source, :tokens
 
-      @keywords = {
+      KEYWORDS = {
         'and' => TokenType::AND,
         'class' => TokenType::CLASS,
         'else' => TokenType::ELSE,
@@ -25,7 +25,7 @@ module Lox
         'true' => TokenType::TRUE,
         'var' => TokenType::VAR,
         'while' => TokenType::WHILE
-      }
+      }.freeze
 
       def initialize(source)
         @source = source
@@ -172,7 +172,7 @@ module Lox
         advance while alpha_numeric?(peek)
 
         text = @source[@start...@current]
-        type = @keywords[text] || TokenType::IDENTIFIER
+        type = KEYWORDS[text] || TokenType::IDENTIFIER
         add_token(type)
       end
 

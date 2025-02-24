@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../runtime_error'
+require_relative 'runtime_error'
 
 module Lox
   module Interpreter

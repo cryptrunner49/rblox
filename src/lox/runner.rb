@@ -46,46 +46,53 @@ module Lox
       def run_prompt
         puts 'rblox 0.0.1'
         puts 'CTRL+C or CTRL+D (CTRL+Z on Windows) to quit'
+        # Load history from file (optional)
 
+        history_file = File.expand_path('~/.rblox_history')
+
+        File.readlines(history_file, chomp: true).each { |line| Readline::HISTORY << line } if File.exist?(history_file)
+
+        # Autocompletion
         lox_terms = %w[if else while for print true false nil + - * / == != < > <= >= ( ) { } ;]
-        Readline.completion_proc = proc do |input|
+        Readline.completion_proc = proc { |input|
           lox_terms.grep(/^#{Regexp.escape(input)}/)
-        end
-        Readline.completion_append_character = ' '
+        }
 
         begin
           loop do
             line = Readline.readline('rblox>> '.red, true)
-            break if line.nil? || line.empty? || %w[exit exit! quit].include?(line.strip)
+            break if line.nil? || line.empty? || %w[exit exit! quit].include?(line)
 
             run(line)
           end
         rescue Interrupt
           puts "\n"
         ensure
+          # Save history to file (optional)
+          File.write(history_file, "#{Readline::HISTORY.to_a.join("\n")}\n") if Readline::HISTORY.any?
           puts EXIT_MESSAGE
           exit(0)
         end
       end
 
       def run(source)
-        # puts "Processing source: #{source}"  # Debug input
+        puts "Processing source: #{source}"
         analyzer = Lexical::Analyzer.new(source)
         tokens = analyzer.scan_tokens
-        # puts "Tokens: #{tokens.map(&:to_s)}"  # Debug tokens
+        puts "Tokens: #{tokens.map(&:to_s)}"
 
         parser = Syntax::Parser.new(tokens)
         statements = parser.parse
 
         if statements.nil?
-          puts 'Parse error occurred' # Debug parse failure
+          puts 'Parse error occurred'
           @had_error = true
           return
         end
 
+        puts 'Statements parsed:'
         statements.each { |stmt| puts Generator::AstPrinter.new.print(stmt) }
 
-        # puts "Statements parsed: #{statements.map(&:inspect)}"  # Debug statements
         evaluator = Interpreter::ExpressionEvaluator.new
         evaluator.interpret(statements)
       end

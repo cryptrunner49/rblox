@@ -42,7 +42,7 @@ module Generator
     end
 
     def visit_expression_stmt(stmt)
-      stmt.expression.accept(self)  # Delegate to the expression's printing
+      stmt.expression.accept(self) # Delegate to the expression's printing
     end
 
     def visit_print_stmt(stmt)
@@ -83,7 +83,7 @@ if __FILE__ == $PROGRAM_NAME
 
   # Test Stmt
   stmt = Lox::Stmt::Print.new(
-    Lox::Syntax::Expr::Literal.new("Hello")
+    Lox::Syntax::Expr::Literal.new('Hello')
   )
   puts printer.print(stmt)
 
@@ -94,8 +94,8 @@ if __FILE__ == $PROGRAM_NAME
   puts printer.print(var_stmt)
 
   block_stmt = Lox::Stmt::Block.new([
-    Lox::Stmt::Expression.new(Lox::Syntax::Expr::Literal.new(1)),
-    Lox::Stmt::Print.new(Lox::Syntax::Expr::Literal.new("test"))
-  ])
+                                      Lox::Stmt::Expression.new(Lox::Syntax::Expr::Literal.new(1)),
+                                      Lox::Stmt::Print.new(Lox::Syntax::Expr::Literal.new('test'))
+                                    ])
   puts printer.print(block_stmt)
 end
