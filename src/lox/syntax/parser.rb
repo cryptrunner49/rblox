@@ -57,15 +57,15 @@ module Lox
 
       def var_declaration
         name = consume(Lox::Lexical::TokenType::IDENTIFIER, 'Expect variable name.')
-        
+
         # Add error recovery for missing initializer
         initializer = nil
         if match(Lox::Lexical::TokenType::EQUAL)
           initializer = expression
         else
-          error(peek, "Variable declaration missing initializer") unless check(Lox::Lexical::TokenType::SEMICOLON)
+          error(peek, 'Variable declaration missing initializer') unless check(Lox::Lexical::TokenType::SEMICOLON)
         end
-        
+
         consume(Lox::Lexical::TokenType::SEMICOLON, "Expect ';' after variable declaration.")
         Syntax::Stmt::Var.new(name, initializer)
       end
@@ -106,7 +106,7 @@ module Lox
         end
         consume(Lox::Lexical::TokenType::RIGHT_BRACE, "Expect '}' after block.")
         statements
-      end      
+      end
 
       def equality
         expr = comparison

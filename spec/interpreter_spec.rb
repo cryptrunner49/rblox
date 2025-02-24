@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/interpreter_spec.rb
 require 'rspec'
 require 'stringio'
@@ -15,8 +17,8 @@ module Lox
       $stdout = original_stdout
     end
 
-    context "Nested Block Scoping and Variable Shadowing" do
-      it "correctly handles nested blocks with variable shadowing" do
+    context 'Nested Block Scoping and Variable Shadowing' do
+      it 'correctly handles nested blocks with variable shadowing' do
         source = <<~LOX
           var x = "outer";
           {
@@ -26,22 +28,22 @@ module Lox
           print x;
         LOX
         output = capture_stdout { Runner.run(source) }
-        expect(output).to include("inner")
-        expect(output).to include("outer")
+        expect(output).to include('inner')
+        expect(output).to include('outer')
       end
     end
 
-    context "Operator Precedence" do
-      it "evaluates 1 + 2 * 3 with multiplication taking precedence" do
-        source = "print 1 + 2 * 3;"
+    context 'Operator Precedence' do
+      it 'evaluates 1 + 2 * 3 with multiplication taking precedence' do
+        source = 'print 1 + 2 * 3;'
         output = capture_stdout { Runner.run(source) }
-        expect(output).to include("7")
+        expect(output).to include('7')
       end
 
-      it "evaluates (1 + 2) * 3 with parentheses altering precedence" do
-        source = "print (1 + 2) * 3;"
+      it 'evaluates (1 + 2) * 3 with parentheses altering precedence' do
+        source = 'print (1 + 2) * 3;'
         output = capture_stdout { Runner.run(source) }
-        expect(output).to include("9")
+        expect(output).to include('9')
       end
     end
   end

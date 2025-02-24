@@ -7,9 +7,9 @@ require_relative '../src/lox/syntax/expr'
 module Generator
   class AstPrinter
     def print(node)
-      if node
-        node.accept(self)
-      end
+      return unless node
+
+      node.accept(self)
     end
 
     # Expr Visitor Methods

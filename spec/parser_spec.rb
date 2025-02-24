@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Module: Lox::Syntax
 # Tests for parsing basic expressions, nested blocks, and error recovery in the parser.
 
@@ -13,7 +15,7 @@ module Lox
         analyzer.scan_tokens
       end
 
-      it "parses a simple print statement" do
+      it 'parses a simple print statement' do
         source = 'print 123;'
         tokens = tokens_for(source)
         parser = Parser.new(tokens)
@@ -21,7 +23,7 @@ module Lox
         expect(statements.size).to eq(1)
       end
 
-      it "parses nested blocks correctly" do
+      it 'parses nested blocks correctly' do
         source = <<~LOX
           {
             print 1;
