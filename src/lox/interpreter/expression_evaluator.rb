@@ -76,6 +76,8 @@ module Lox
           end
         when Lox::Lexical::TokenType::SLASH
           check_number_operands(expr.operator, left, right)
+          raise Lox::RuntimeError.new(expr.operator, 'Division by zero.') if right.zero?
+
           left.to_f / right
         when Lox::Lexical::TokenType::STAR
           check_number_operands(expr.operator, left, right)
@@ -114,7 +116,7 @@ module Lox
       end
 
       def visit_block_stmt(stmt)
-        execute_block(stmt.statements, Lox::Environment.new(@environment))
+        execute_block(stmt.statements, Lox::Interpreter::Environment.new(@environment))
         nil
       end
 

@@ -1,13 +1,10 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-begin
-  require 'readline'
-rescue LoadError
-  require 'rb-readline'
-end
+require 'readline'
 
 require_relative 'lexical/analyzer'
+require_relative 'lexical/token_type'
 require_relative 'syntax/parser'
 require_relative 'syntax/expr'
 require_relative 'interpreter/expression_evaluator'
@@ -98,7 +95,7 @@ module Lox
       end
 
       def error(token, message)
-        if token.type == TokenType::EOF
+        if token.type == Lexical::TokenType::EOF
           report(token.line, ' at end', message)
         else
           report(token.line, " at '#{token.lexeme}'", message)

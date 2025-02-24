@@ -74,9 +74,9 @@ module Lox
             advance while peek != "\n" && !at_end?
           elsif match('*')
             # A block comment goes until we find '*/'
-            while peek != '*' || peek_next != '/' && !at_end?
+            until (peek == '*' && peek_next == '/') || at_end?
               advance
-              @line += 1 if peek == "\n" # Keep track of new lines
+              @line += 1 if peek == "\n"
             end
             unless at_end?
               advance # Consume '*'

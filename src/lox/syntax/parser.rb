@@ -19,10 +19,13 @@ module Lox
       def parse
         statements = []
         begin
-          statements << statement until at_end?
+          until at_end?
+            stmt = statement
+            statements << stmt if stmt # Filter nil statements
+          end
           statements
         rescue ParseError
-          nil
+          statements.compact # Return non-nil statements we managed to parse
         end
       end
 
@@ -89,7 +92,10 @@ module Lox
 
       def block
         statements = []
-        statements << declaration while !check(Lox::Lexical::TokenType::RIGHT_BRACE) && !at_end?
+        while !check(Lox::Lexical::TokenType::RIGHT_BRACE) && !at_end?
+          stmt = declaration
+          statements << stmt if stmt # Filter nil statements
+        end
         consume(Lox::Lexical::TokenType::RIGHT_BRACE, "Expect '}' after block.")
         statements
       end
