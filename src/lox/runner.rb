@@ -69,21 +69,23 @@ module Lox
       end
 
       def run(source)
-        puts "Processing source: #{source}"  # Debug input
+        # puts "Processing source: #{source}"  # Debug input
         analyzer = Lexical::Analyzer.new(source)
         tokens = analyzer.scan_tokens
-        puts "Tokens: #{tokens.map(&:to_s)}"  # Debug tokens
+        # puts "Tokens: #{tokens.map(&:to_s)}"  # Debug tokens
 
         parser = Syntax::Parser.new(tokens)
         statements = parser.parse
-        
+
         if statements.nil?
-          puts "Parse error occurred"  # Debug parse failure
+          puts 'Parse error occurred' # Debug parse failure
           @had_error = true
           return
         end
 
-        puts "Statements parsed: #{statements.map(&:inspect)}"  # Debug statements
+        statements.each { |stmt| puts Generator::AstPrinter.new.print(stmt) }
+
+        # puts "Statements parsed: #{statements.map(&:inspect)}"  # Debug statements
         evaluator = Interpreter::ExpressionEvaluator.new
         evaluator.interpret(statements)
       end
