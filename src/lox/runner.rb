@@ -114,8 +114,8 @@ module Lox
       private
 
       #def report(line, where, message)
-     #   source_line = @source.split("\n")[line - 1]
-     #   warn "[line #{line}] Error#{where}: #{message}"
+      #  source_line = @source.split("\n")[line - 1]
+      #  warn "[line #{line}] Error#{where}: #{message}"
       #  warn "  #{source_line}"
       #  warn "  " + (" " * (where.to_i - 1)) + "^"
       #end
