@@ -11,14 +11,14 @@ print "Hello"; var x = 5; print x;
 print("while---");
 
 var w = 0;
-while (w < 10) {
+while (w < 5) {
   w = w + 1;
   print w;
 } 
 
 print("for---1");
 
-for (var a = 0; a <= 10; a = a + 1) {
+for (var a = 0; a <= 5; a = a + 1) {
   print(a);
 }
 
