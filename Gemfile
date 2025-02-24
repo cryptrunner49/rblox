@@ -2,5 +2,10 @@
 
 source 'https://rubygems.org'
 
-# Ruby version (optional, adjust to your needs)
+# Ruby version
 ruby '>= 3.3.6'
+
+# Dependencies
+gem 'readline'
+gem 'rspec'
+gem 'stringio'
