@@ -3,6 +3,7 @@
 require_relative '../lexical/token'
 require_relative '../lexical/token_type'
 require_relative 'expr'
+require_relative 'stmt'
 
 module Lox
   module Syntax
@@ -15,9 +16,13 @@ module Lox
       end
 
       def parse
-        expression
-      rescue ParseError
-        nil
+        statements = []
+        begin
+          statements << statement until at_end?
+          statements
+        rescue ParseError
+          nil
+        end
       end
 
       private
@@ -25,13 +30,31 @@ module Lox
       attr_reader :tokens
       attr_accessor :current
 
+      def statement
+        return print_statement if match(Lox::Lexical::TokenType::PRINT)
+
+        expression_statement
+      end
+
+      def print_statement
+        value = expression
+        consume(Lox::Lexical::TokenType::SEMICOLON, "Expect ';' after value.")
+        Syntax::Stmt::Print.new(value)
+      end
+
+      def expression_statement
+        expr = expression
+        consume(Lox::Lexical::TokenType::SEMICOLON, "Expect ';' after expression.")
+        Syntax::Stmt::Expression.new(expr)
+      end
+
       def expression
         equality
       end
 
       def equality
         expr = comparison
-        while match(Lexical::TokenType::BANG_EQUAL, Lexical::TokenType::EQUAL_EQUAL)
+        while match(Lox::Lexical::TokenType::BANG_EQUAL, Lox::Lexical::TokenType::EQUAL_EQUAL)
           operator = previous
           right = comparison
           expr = Expr::Binary.new(expr, operator, right)
@@ -41,8 +64,8 @@ module Lox
 
       def comparison
         expr = term
-        while match(Lexical::TokenType::GREATER, Lexical::TokenType::GREATER_EQUAL,
-                    Lexical::TokenType::LESS, Lexical::TokenType::LESS_EQUAL)
+        while match(Lox::Lexical::TokenType::GREATER, Lox::Lexical::TokenType::GREATER_EQUAL,
+                    Lox::Lexical::TokenType::LESS, Lox::Lexical::TokenType::LESS_EQUAL)
           operator = previous
           right = term
           expr = Expr::Binary.new(expr, operator, right)
@@ -52,7 +75,7 @@ module Lox
 
       def term
         expr = factor
-        while match(Lexical::TokenType::MINUS, Lexical::TokenType::PLUS)
+        while match(Lox::Lexical::TokenType::MINUS, Lox::Lexical::TokenType::PLUS)
           operator = previous
           right = factor
           expr = Expr::Binary.new(expr, operator, right)
@@ -62,7 +85,7 @@ module Lox
 
       def factor
         expr = unary
-        while match(Lexical::TokenType::SLASH, Lexical::TokenType::STAR)
+        while match(Lox::Lexical::TokenType::SLASH, Lox::Lexical::TokenType::STAR)
           operator = previous
           right = unary
           expr = Expr::Binary.new(expr, operator, right)
@@ -71,7 +94,7 @@ module Lox
       end
 
       def unary
-        if match(Lexical::TokenType::BANG, Lexical::TokenType::MINUS)
+        if match(Lox::Lexical::TokenType::BANG, Lox::Lexical::TokenType::MINUS)
           operator = previous
           right = unary
           return Expr::Unary.new(operator, right)
@@ -80,17 +103,17 @@ module Lox
       end
 
       def primary
-        if match(Lexical::TokenType::FALSE)
+        if match(Lox::Lexical::TokenType::FALSE)
           return Expr::Literal.new(false)
-        elsif match(Lexical::TokenType::TRUE)
+        elsif match(Lox::Lexical::TokenType::TRUE)
           return Expr::Literal.new(true)
-        elsif match(Lexical::TokenType::NIL)
+        elsif match(Lox::Lexical::TokenType::NIL)
           return Expr::Literal.new(nil)
-        elsif match(Lexical::TokenType::NUMBER, Lexical::TokenType::STRING)
+        elsif match(Lox::Lexical::TokenType::NUMBER, Lox::Lexical::TokenType::STRING)
           return Expr::Literal.new(previous.literal)
-        elsif match(Lexical::TokenType::LEFT_PAREN)
+        elsif match(Lox::Lexical::TokenType::LEFT_PAREN)
           expr = expression
-          consume(Lexical::TokenType::RIGHT_PAREN, "Expect ')' after expression.")
+          consume(Lox::Lexical::TokenType::RIGHT_PAREN, "Expect ')' after expression.")
           return Expr::Grouping.new(expr)
         end
 
@@ -119,7 +142,7 @@ module Lox
       end
 
       def at_end?
-        peek.type == Lexical::TokenType::EOF
+        peek.type == Lox::Lexical::TokenType::EOF
       end
 
       def peek
@@ -137,18 +160,20 @@ module Lox
       end
 
       def error(token, message)
-        Lox::Interpreter.error(token, message)
+        Lox::Runner.error(token, message)
         ParseError.new
       end
 
       def synchronize
         advance
         until at_end?
-          return if previous.type == Lexical::TokenType::SEMICOLON
+          return if previous.type == Lox::Lexical::TokenType::SEMICOLON
 
           case peek.type
-          when Lexical::TokenType::CLASS, Lexical::TokenType::FUN, Lexical::TokenType::VAR, Lexical::TokenType::FOR,
-              Lexical::TokenType::IF, Lexical::TokenType::WHILE, Lexical::TokenType::PRINT, Lexical::TokenType::RETURN
+          when Lox::Lexical::TokenType::CLASS, Lox::Lexical::TokenType::FUN,
+               Lox::Lexical::TokenType::VAR, Lox::Lexical::TokenType::FOR,
+               Lox::Lexical::TokenType::IF, Lox::Lexical::TokenType::WHILE,
+               Lox::Lexical::TokenType::PRINT, Lox::Lexical::TokenType::RETURN
             return
           end
           advance

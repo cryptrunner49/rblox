@@ -10,7 +10,7 @@ end
 require_relative 'lexical/analyzer'
 require_relative 'syntax/parser'
 require_relative 'syntax/expr'
-require_relative 'interpreter/expression_evaluator'  # Add this
+require_relative 'interpreter/expression_evaluator'
 require_relative 'utils/string_colors'
 require_relative '../../generator/ast_printer'
 
@@ -24,7 +24,7 @@ module Lox
 
       @had_error = false
 
-      EXIT_MESSAGE = "\nExiting rblox. Goodbye!".freeze
+      EXIT_MESSAGE = "\nExiting rblox. Goodbye!"
 
       def main(args)
         if args.length > 1
@@ -72,18 +72,17 @@ module Lox
         analyzer = Lexical::Analyzer.new(source)
         tokens = analyzer.scan_tokens
         parser = Syntax::Parser.new(tokens)
-        expression = parser.parse
+        statements = parser.parse
 
-        if expression.nil?
+        if statements.nil?
           @had_error = true
           return
         end
 
-        # Evaluate the expression
-        evaluator = ExpressionEvaluator.new
-        result = expression.accept(evaluator)
-        puts "Result: #{result.inspect}"  # Replace AST printing with evaluation result
-        result
+        evaluator = Interpreter::ExpressionEvaluator.new
+        statements.each do |stmt|
+          stmt.accept(evaluator)
+        end
       end
 
       def error(token, message)

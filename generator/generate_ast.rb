@@ -12,6 +12,12 @@ module Generator
                    'Literal : Object value',
                    'Unary : Token operator, Expr right'
                  ])
+
+      # Define statement AST
+      define_ast(output_dir, 'Stmt', [
+                   'Expression : Expr expression',
+                   'Print : Expr expression'
+                 ])
     end
 
     def self.define_ast(output_dir, base_name, types)
