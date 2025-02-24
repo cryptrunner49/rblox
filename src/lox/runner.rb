@@ -93,8 +93,9 @@ module Lox
         #puts 'Statements parsed:'
         #statements.each { |stmt| puts Generator::AstPrinter.new.print(stmt) }
 
-        evaluator = Interpreter::ExpressionEvaluator.new
-        evaluator.interpret(statements)
+        # Use a persistent interpreter instance.
+        @interpreter ||= Interpreter::ExpressionEvaluator.new
+        @interpreter.interpret(statements)
       end
 
       def error(token, message)
