@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative '../interpreter/lox_callable.rb'
+require_relative '../interpreter/lox_function'
+require_relative '../interpreter/return'
 require_relative '../lexical/token'
 require_relative '../lexical/token_type'
 require_relative 'expr'
@@ -38,6 +41,8 @@ module Lox
           if_statement
         elsif match(Lox::Lexical::TokenType::PRINT)
           print_statement
+        elsif match(Lox::Lexical::TokenType::RETURN)
+          return_statement
         elsif match(Lox::Lexical::TokenType::WHILE)
           while_statement
         elsif match(Lox::Lexical::TokenType::FOR)
@@ -50,7 +55,9 @@ module Lox
       end
 
       def declaration
-        if match(Lox::Lexical::TokenType::VAR)
+        if match(Lexical::TokenType::FUN)
+          function 'function'
+        elsif match(Lox::Lexical::TokenType::VAR)
           var_declaration
         else
           expression_statement
@@ -58,6 +65,23 @@ module Lox
       rescue ParseError
         synchronize
         nil
+      end
+
+      def function(kind)
+        name = consume(Lox::Lexical::TokenType::IDENTIFIER, "Expect #{kind} name.")
+        consume(Lexical::TokenType::LEFT_PAREN, "Expect '(' after #{kind} name.")
+        parameters = []
+        unless check(Lexical::TokenType::RIGHT_PAREN)
+          loop do
+            error(peek, "Can't have more than 255 parameters.") if parameters.length >= 255
+            parameters << consume(Lexical::TokenType::IDENTIFIER, 'Expect parameter name.')
+            break unless match(Lexical::TokenType::COMMA)
+          end
+        end
+        consume(Lexical::TokenType::RIGHT_PAREN, "Expect ')' after parameters.")
+        consume(Lox::Lexical::TokenType::LEFT_BRACE, "Expect '{' before #{kind} body.")
+        body = block
+        Lox::Syntax::Stmt::Function.new(name, parameters, body)
       end
 
       def var_declaration
@@ -87,7 +111,7 @@ module Lox
 
         condition = check(Lox::Lexical::TokenType::SEMICOLON) ? nil : expression
         consume(Lox::Lexical::TokenType::SEMICOLON, "Expect ';' after loop condition.")
-        
+
         increment = nil
         increment = expression unless check(Lox::Lexical::TokenType::RIGHT_PAREN)
 
@@ -98,10 +122,10 @@ module Lox
 
         if increment
           body = Lox::Syntax::Stmt::Block.new([
-            body,
-            Lox::Syntax::Stmt::Expression.new(increment)
-          ])
-        end        
+                                                body,
+                                                Lox::Syntax::Stmt::Expression.new(increment)
+                                              ])
+        end
 
         body = Lox::Syntax::Stmt::While.new(condition || Lox::Syntax::Expr::Literal.new(true), body)
         body = Lox::Syntax::Stmt::Block.new([initializer, body]) if initializer
@@ -115,6 +139,13 @@ module Lox
         consume(Lox::Lexical::TokenType::RIGHT_PAREN, "Expect ')' after condition.")
         body = statement
         Lox::Syntax::Stmt::While.new(condition, body)
+      end
+
+      def return_statement
+        keyword = previous
+        value = check(Lox::Lexical::TokenType::SEMICOLON) ? nil : expression
+        consume(Lox::Lexical::TokenType::SEMICOLON, "Expect ';' after return value.")
+        Lox::Syntax::Stmt::Return.new(keyword, value)
       end
 
       def if_statement
@@ -231,7 +262,30 @@ module Lox
           right = unary
           return Syntax::Expr::Unary.new(operator, right)
         end
-        primary
+        call
+      end
+
+      def call
+        expr = primary
+        loop do
+          break unless match(Lox::Lexical::TokenType::LEFT_PAREN)
+
+          expr = finish_call(expr)
+        end
+        expr
+      end
+
+      def finish_call(callee)
+        arguments = []
+        unless check(Lox::Lexical::TokenType::RIGHT_PAREN)
+          loop do
+            error(peek, "Can't have more than 255 arguments.") if arguments.length >= 255
+            arguments << expression
+            break unless match(Lox::Lexical::TokenType::COMMA)
+          end
+        end
+        paren = consume(Lox::Lexical::TokenType::RIGHT_PAREN, "Expect ')' after arguments.")
+        Expr::Call.new(callee, paren, arguments)
       end
 
       def primary

@@ -8,15 +8,35 @@ require_relative 'environment'
 module Lox
   module Interpreter
     class ExpressionEvaluator
+      # Class-level variable
+      GLOBALS = Lox::Interpreter::Environment.new.freeze
+
+      # Instance variable
       def initialize
-        @environment = Interpreter::Environment.new
+        @environment = GLOBALS
+
+        @environment.define('clock', Class.new do
+          include Lox::Interpreter::LoxCallable
+
+          def arity
+            0
+          end
+
+          def call(_interpreter, _arguments)
+            Time.now.to_f # Returns current time in seconds since epoch
+          end
+
+          def to_s
+            '<native fn>'
+          end
+        end.new)
       end
 
       def interpret(statements)
         statements.each do |statement|
           execute(statement)
         end
-      rescue Lox::RuntimeError => e
+      rescue Lox::Interpreter::RuntimeError => e
         Lox::Runner.runtime_error(e)
         nil # Return nil to indicate failure
       end
@@ -46,6 +66,15 @@ module Lox
         nil
       end
 
+      def visit_if_stmt(stmt)
+        if is_truthy(evaluate(stmt.condition))
+          execute(stmt.then_branch)
+        elsif stmt.else_branch
+          execute(stmt.else_branch)
+        end
+        nil
+      end
+
       def visit_unary_expr(expr)
         right = evaluate(expr.right)
         case expr.operator.type
@@ -57,6 +86,26 @@ module Lox
         else
           nil # Unreachable
         end
+      end
+
+      def visit_call_expr(expr)
+        callee = evaluate(expr.callee)
+        arguments = expr.arguments.map { |argument| evaluate(argument) }
+
+        unless callee.is_a?(Lox::Interpreter::LoxCallable)
+          raise Lox::Interpreter::RuntimeError.new(expr.paren, 'Can only call functions and classes.')
+        end
+
+        function = callee
+
+        if arguments.length != function.arity
+          raise Lox::Interpreter::RuntimeError.new(expr.paren,
+                                                   "Expected #{function.arity} arguments but got #{arguments.length}.")
+        end
+
+        function.call(self, arguments)
+
+        function.call(self, arguments)
       end
 
       def visit_binary_expr(expr)
@@ -88,11 +137,11 @@ module Lox
           elsif left.is_a?(String) && right.is_a?(String)
             left + right
           else
-            raise Lox::RuntimeError.new(expr.operator, 'Operands must be two numbers or two strings.')
+            raise Lox::Interpreter::RuntimeError.new(expr.operator, 'Operands must be two numbers or two strings.')
           end
         when Lox::Lexical::TokenType::SLASH
           check_number_operands(expr.operator, left, right)
-          raise Lox::RuntimeError.new(expr.operator, 'Division by zero.') if right.zero?
+          raise Lox::Interpreter::RuntimeError.new(expr.operator, 'Division by zero.') if right.zero?
 
           left.to_f / right
         when Lox::Lexical::TokenType::STAR
@@ -119,10 +168,21 @@ module Lox
         nil
       end
 
+      def visit_function_stmt(stmt)
+        function = Lox::Interpreter::LoxFunction.new(stmt, @environment)
+        @environment.define(stmt.name.lexeme, function)
+        nil
+      end
+
       def visit_print_stmt(stmt)
         value = evaluate(stmt.expression)
-        puts stringify(value) # Ensure this prints to stdout
+        puts stringify(value)
         nil
+      end
+
+      def visit_return_stmt(stmt)
+        value = stmt.value ? evaluate(stmt.value) : nil
+        raise Lox::Interpreter::Return, value
       end
 
       def visit_var_stmt(stmt)
@@ -136,16 +196,6 @@ module Lox
         nil
       end
 
-      private
-
-      def evaluate(expr)
-        expr.accept(self)
-      end
-
-      def execute(stmt)
-        stmt.accept(self)
-      end
-
       def execute_block(statements, environment)
         previous = @environment
         begin
@@ -154,6 +204,16 @@ module Lox
         ensure
           @environment = previous
         end
+      end
+
+      private
+
+      def evaluate(expr)
+        expr.accept(self)
+      end
+
+      def execute(stmt)
+        stmt.accept(self)
       end
 
       def is_truthy(object)
@@ -173,13 +233,13 @@ module Lox
       def check_number_operand(operator, operand)
         return if operand.is_a?(Numeric)
 
-        raise Lox::RuntimeError.new(operator, 'Operand must be a number.')
+        raise Lox::Interpreter::RuntimeError.new(operator, 'Operand must be a number.')
       end
 
       def check_number_operands(operator, left, right)
         return if left.is_a?(Numeric) && right.is_a?(Numeric)
 
-        raise Lox::RuntimeError.new(operator, 'Operands must be numbers.')
+        raise Lox::Interpreter::RuntimeError.new(operator, 'Operands must be numbers.')
       end
 
       def stringify(object)

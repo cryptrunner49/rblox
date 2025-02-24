@@ -1,11 +1,12 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 require 'benchmark'
 
-require_relative '../lox/lexical/analyzer'
-require_relative '../lox/syntax/parser'
+require_relative '../src/lox/lexical/analyzer'
+require_relative '../src/lox/syntax/parser'
 
-source = File.read('./scripts/large_source_file.lox')
+source = File.read('scripts/fun_test.lox')
 analyzer = Lox::Lexical::Analyzer.new(source)
 
 Benchmark.bm do |bm|

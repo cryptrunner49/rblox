@@ -33,6 +33,11 @@ module Generator
       parenthesize(expr.operator.lexeme, expr.right)
     end
 
+    def visit_call_expr(expr)
+      args = expr.arguments.map { |arg| arg.accept(self) }.join(' ')
+      "(call #{expr.callee.accept(self)} #{args})"
+    end
+
     def visit_variable_expr(expr)
       expr.name.lexeme
     end

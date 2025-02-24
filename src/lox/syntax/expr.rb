@@ -7,142 +7,165 @@ require_relative '../lexical/token'
 module Lox
   module Syntax
     class Expr
-      module Visitor
-        def visit_assign_expr(expr)
-          raise NotImplementedError, 'Must implement visit_assign_expr'
-        end
+    module Visitor
+      def visit_assign_expr(expr)
+        raise NotImplementedError, "Must implement visit_assign_expr"
+      end
 
-        def visit_binary_expr(expr)
-          raise NotImplementedError, 'Must implement visit_binary_expr'
-        end
+      def visit_binary_expr(expr)
+        raise NotImplementedError, "Must implement visit_binary_expr"
+      end
 
-        def visit_grouping_expr(expr)
-          raise NotImplementedError, 'Must implement visit_grouping_expr'
-        end
+      def visit_call_expr(expr)
+        raise NotImplementedError, "Must implement visit_call_expr"
+      end
 
-        def visit_literal_expr(expr)
-          raise NotImplementedError, 'Must implement visit_literal_expr'
-        end
+      def visit_grouping_expr(expr)
+        raise NotImplementedError, "Must implement visit_grouping_expr"
+      end
 
-        def visit_logical_expr(expr)
-          raise NotImplementedError, 'Must implement visit_logical_expr'
-        end
+      def visit_literal_expr(expr)
+        raise NotImplementedError, "Must implement visit_literal_expr"
+      end
 
-        def visit_unary_expr(expr)
-          raise NotImplementedError, 'Must implement visit_unary_expr'
-        end
+      def visit_logical_expr(expr)
+        raise NotImplementedError, "Must implement visit_logical_expr"
+      end
 
-        def visit_variable_expr(expr)
-          raise NotImplementedError, 'Must implement visit_variable_expr'
-        end
+      def visit_unary_expr(expr)
+        raise NotImplementedError, "Must implement visit_unary_expr"
+      end
+
+      def visit_variable_expr(expr)
+        raise NotImplementedError, "Must implement visit_variable_expr"
+      end
+
+    end
+
+      def accept(visitor)
+        raise NotImplementedError, "Subclasses must implement accept"
+      end
+
+    class Assign < Expr
+      # @name : Token
+      # @value : Expr
+      attr_reader :name, :value
+
+      def initialize(name, value)
+        @name = name
+        @value = value
       end
 
       def accept(visitor)
-        raise NotImplementedError, 'Subclasses must implement accept'
+        visitor.visit_assign_expr(self)
+      end
+    end
+
+    class Binary < Expr
+      # @left : Expr
+      # @operator : Token
+      # @right : Expr
+      attr_reader :left, :operator, :right
+
+      def initialize(left, operator, right)
+        @left = left
+        @operator = operator
+        @right = right
       end
 
-      class Assign < Expr
-        # @name : Token
-        # @value : Expr
-        attr_reader :name, :value
+      def accept(visitor)
+        visitor.visit_binary_expr(self)
+      end
+    end
 
-        def initialize(name, value)
-          @name = name
-          @value = value
-        end
+    class Call < Expr
+      # @callee : Expr
+      # @paren : Token
+      # @arguments : Expr[]
+      attr_reader :callee, :paren, :arguments
 
-        def accept(visitor)
-          visitor.visit_assign_expr(self)
-        end
+      def initialize(callee, paren, arguments)
+        @callee = callee
+        @paren = paren
+        @arguments = arguments
       end
 
-      class Binary < Expr
-        # @left : Expr
-        # @operator : Token
-        # @right : Expr
-        attr_reader :left, :operator, :right
+      def accept(visitor)
+        visitor.visit_call_expr(self)
+      end
+    end
 
-        def initialize(left, operator, right)
-          @left = left
-          @operator = operator
-          @right = right
-        end
+    class Grouping < Expr
+      # @expression : Expr
+      attr_reader :expression
 
-        def accept(visitor)
-          visitor.visit_binary_expr(self)
-        end
+      def initialize(expression)
+        @expression = expression
       end
 
-      class Grouping < Expr
-        # @expression : Expr
-        attr_reader :expression
+      def accept(visitor)
+        visitor.visit_grouping_expr(self)
+      end
+    end
 
-        def initialize(expression)
-          @expression = expression
-        end
+    class Literal < Expr
+      # @value : Object
+      attr_reader :value
 
-        def accept(visitor)
-          visitor.visit_grouping_expr(self)
-        end
+      def initialize(value)
+        @value = value
       end
 
-      class Literal < Expr
-        # @value : Object
-        attr_reader :value
+      def accept(visitor)
+        visitor.visit_literal_expr(self)
+      end
+    end
 
-        def initialize(value)
-          @value = value
-        end
+    class Logical < Expr
+      # @left : Expr
+      # @operator : Token
+      # @right : Expr
+      attr_reader :left, :operator, :right
 
-        def accept(visitor)
-          visitor.visit_literal_expr(self)
-        end
+      def initialize(left, operator, right)
+        @left = left
+        @operator = operator
+        @right = right
       end
 
-      class Logical < Expr
-        # @left : Expr
-        # @operator : Token
-        # @right : Expr
-        attr_reader :left, :operator, :right
+      def accept(visitor)
+        visitor.visit_logical_expr(self)
+      end
+    end
 
-        def initialize(left, operator, right)
-          @left = left
-          @operator = operator
-          @right = right
-        end
+    class Unary < Expr
+      # @operator : Token
+      # @right : Expr
+      attr_reader :operator, :right
 
-        def accept(visitor)
-          visitor.visit_logical_expr(self)
-        end
+      def initialize(operator, right)
+        @operator = operator
+        @right = right
       end
 
-      class Unary < Expr
-        # @operator : Token
-        # @right : Expr
-        attr_reader :operator, :right
+      def accept(visitor)
+        visitor.visit_unary_expr(self)
+      end
+    end
 
-        def initialize(operator, right)
-          @operator = operator
-          @right = right
-        end
+    class Variable < Expr
+      # @name : Token
+      attr_reader :name
 
-        def accept(visitor)
-          visitor.visit_unary_expr(self)
-        end
+      def initialize(name)
+        @name = name
       end
 
-      class Variable < Expr
-        # @name : Token
-        attr_reader :name
-
-        def initialize(name)
-          @name = name
-        end
-
-        def accept(visitor)
-          visitor.visit_variable_expr(self)
-        end
+      def accept(visitor)
+        visitor.visit_variable_expr(self)
       end
+    end
+
     end
   end
 end

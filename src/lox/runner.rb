@@ -173,7 +173,7 @@ module Lox
         @interpreter ||= Interpreter::ExpressionEvaluator.new
         begin
           @interpreter.interpret(statements)
-        rescue Lox::RuntimeError => e
+        rescue Lox::Interpreter::RuntimeError => e
           runtime_error(e)
         end
       end
