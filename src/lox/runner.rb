@@ -73,10 +73,10 @@ module Lox
       end
 
       def run(source)
-        puts "Processing source: #{source}"
+        #puts "Processing source: #{source}"
         analyzer = Lexical::Analyzer.new(source)
         tokens = analyzer.scan_tokens
-        puts "Tokens: #{tokens.map(&:to_s)}"
+        #puts "Tokens: #{tokens.map(&:to_s)}"
 
         parser = Syntax::Parser.new(tokens)
         statements = parser.parse
@@ -87,8 +87,8 @@ module Lox
           return
         end
 
-        puts 'Statements parsed:'
-        statements.each { |stmt| puts Generator::AstPrinter.new.print(stmt) }
+        #puts 'Statements parsed:'
+        #statements.each { |stmt| puts Generator::AstPrinter.new.print(stmt) }
 
         evaluator = Interpreter::ExpressionEvaluator.new
         evaluator.interpret(statements)
