@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: false
 
 require 'readline'
 
@@ -20,7 +21,7 @@ module Lox
 
       @had_error = false
 
-      EXIT_MESSAGE = "\nExiting rblox. Goodbye!"
+      EXIT_MESSAGE = "\nExiting rblox. Goodbye!".freeze
 
       def main(args)
         if args.length > 1
@@ -45,12 +46,9 @@ module Lox
         puts 'CTRL+C or CTRL+D (CTRL+Z on Windows) to quit'
         history_file = File.expand_path('~/.rblox_history')
         load_history(history_file)
-
-
-          buffer = ''
-          prompt = 'rblox>> '.red
-          bracket_stack = []
-          in_multiline = false
+        'rblox>> '.red
+        bracket_stack = []
+        in_multiline = false
 
         # Initialize autocomplete terms
         @completion_terms = %w[
@@ -75,6 +73,7 @@ module Lox
             # Handle empty line submission
             if line.strip.empty?
               next unless in_multiline
+
               buffer << "\n"
               next
             end
@@ -95,10 +94,10 @@ module Lox
             buffer << line << "\n"
 
             if bracket_stack.empty? && complete_statement?(buffer)
-                process_buffer(buffer, history_file)
-                buffer = ''
-                prompt = 'rblox>> '.red
-                in_multiline = false
+              process_buffer(buffer, history_file)
+              buffer = ''
+              prompt = 'rblox>> '.red
+              in_multiline = false
             else
               prompt = ('  ' * bracket_stack.size) + '... '.yellow
               in_multiline = true

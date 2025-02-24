@@ -7,7 +7,6 @@ require_relative 'stmt'
 
 module Lox
   module Syntax
-    # Simplified namespace to match structure
     class Parser
       class ParseError < StandardError; end
 
@@ -35,12 +34,18 @@ module Lox
       attr_accessor :current
 
       def statement
-        if match(Lox::Lexical::TokenType::PRINT)
+        if match(Lox::Lexical::TokenType::IF)
+          if_statement
+        elsif match(Lox::Lexical::TokenType::PRINT)
           print_statement
+        elsif match(Lox::Lexical::TokenType::WHILE)
+          while_statement
+        elsif match(Lox::Lexical::TokenType::FOR)
+          for_statement
         elsif match(Lox::Lexical::TokenType::LEFT_BRACE)
           Syntax::Stmt::Block.new(block)
         else
-          declaration # Now includes VAR or falls to expression_statement
+          declaration
         end
       end
 
@@ -48,7 +53,7 @@ module Lox
         if match(Lox::Lexical::TokenType::VAR)
           var_declaration
         else
-          expression_statement # Break recursion by using expression_statement directly
+          expression_statement
         end
       rescue ParseError
         synchronize
@@ -58,7 +63,6 @@ module Lox
       def var_declaration
         name = consume(Lox::Lexical::TokenType::IDENTIFIER, 'Expect variable name.')
 
-        # Add error recovery for missing initializer
         initializer = nil
         if match(Lox::Lexical::TokenType::EQUAL)
           initializer = expression
@@ -68,6 +72,58 @@ module Lox
 
         consume(Lox::Lexical::TokenType::SEMICOLON, "Expect ';' after variable declaration.")
         Syntax::Stmt::Var.new(name, initializer)
+      end
+
+      def for_statement
+        consume(Lox::Lexical::TokenType::LEFT_PAREN, "Expect '(' after 'for'.")
+
+        initializer = if match(Lox::Lexical::TokenType::SEMICOLON)
+                        nil
+                      elsif match(Lox::Lexical::TokenType::VAR)
+                        var_declaration
+                      else
+                        expression_statement
+                      end
+
+        condition = check(Lox::Lexical::TokenType::SEMICOLON) ? nil : expression
+        consume(Lox::Lexical::TokenType::SEMICOLON, "Expect ';' after loop condition.")
+        
+        increment = nil
+        increment = expression unless check(Lox::Lexical::TokenType::RIGHT_PAREN)
+
+        check(Lox::Lexical::TokenType::RIGHT_PAREN) ? nil : expression
+        consume(Lox::Lexical::TokenType::RIGHT_PAREN, "Expect ')' after for clauses.")
+
+        body = statement
+
+        if increment
+          body = Lox::Syntax::Stmt::Block.new([
+            body,
+            Lox::Syntax::Stmt::Expression.new(increment)
+          ])
+        end        
+
+        body = Lox::Syntax::Stmt::While.new(condition || Lox::Syntax::Expr::Literal.new(true), body)
+        body = Lox::Syntax::Stmt::Block.new([initializer, body]) if initializer
+
+        body
+      end
+
+      def while_statement
+        consume(Lox::Lexical::TokenType::LEFT_PAREN, "Expect '(' after 'while'.")
+        condition = expression
+        consume(Lox::Lexical::TokenType::RIGHT_PAREN, "Expect ')' after condition.")
+        body = statement
+        Lox::Syntax::Stmt::While.new(condition, body)
+      end
+
+      def if_statement
+        consume(Lox::Lexical::TokenType::LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = expression
+        consume(Lox::Lexical::TokenType::RIGHT_PAREN, "Expect ')' after if condition.")
+        then_branch = statement
+        else_branch = match(Lox::Lexical::TokenType::ELSE) ? statement : nil
+        Lox::Syntax::Stmt::If.new(condition, then_branch, else_branch)
       end
 
       def print_statement
@@ -87,7 +143,7 @@ module Lox
       end
 
       def assignment
-        expr = equality
+        expr = or_
         if match(Lox::Lexical::TokenType::EQUAL)
           equals = previous
           value = assignment
@@ -106,6 +162,26 @@ module Lox
         end
         consume(Lox::Lexical::TokenType::RIGHT_BRACE, "Expect '}' after block.")
         statements
+      end
+
+      def or_
+        expr = and_
+        while match(Lox::Lexical::TokenType::OR)
+          operator = previous
+          right = and_
+          expr = Lox::Syntax::Expr::Logical.new(expr, operator, right)
+        end
+        expr
+      end
+
+      def and_
+        expr = equality
+        while match(Lox::Lexical::TokenType::AND)
+          operator = previous
+          right = equality
+          expr = Lox::Syntax::Expr::Logical.new(expr, operator, right)
+        end
+        expr
       end
 
       def equality

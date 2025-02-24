@@ -24,6 +24,10 @@ module Lox
           raise NotImplementedError, 'Must implement visit_literal_expr'
         end
 
+        def visit_logical_expr(expr)
+          raise NotImplementedError, 'Must implement visit_logical_expr'
+        end
+
         def visit_unary_expr(expr)
           raise NotImplementedError, 'Must implement visit_unary_expr'
         end
@@ -92,6 +96,23 @@ module Lox
 
         def accept(visitor)
           visitor.visit_literal_expr(self)
+        end
+      end
+
+      class Logical < Expr
+        # @left : Expr
+        # @operator : Token
+        # @right : Expr
+        attr_reader :left, :operator, :right
+
+        def initialize(left, operator, right)
+          @left = left
+          @operator = operator
+          @right = right
+        end
+
+        def accept(visitor)
+          visitor.visit_logical_expr(self)
         end
       end
 

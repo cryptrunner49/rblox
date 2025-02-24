@@ -30,6 +30,22 @@ module Lox
         evaluate(expr.expression)
       end
 
+      # Stmt Visitor Method
+      def visit_logical_expr(expr)
+        left = evaluate(expr.left)
+        if expr.operator.type == Lox::Lexical::TokenType::OR
+          return left if is_truthy(left)
+        else # AND
+          return left unless is_truthy(left)
+        end
+        evaluate(expr.right)
+      end
+
+      def visit_while_stmt(stmt)
+        execute(stmt.body) while is_truthy(evaluate(stmt.condition))
+        nil
+      end
+
       def visit_unary_expr(expr)
         right = evaluate(expr.right)
         case expr.operator.type

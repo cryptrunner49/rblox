@@ -23,6 +23,10 @@ module Lox
         def visit_var_stmt(expr)
           raise NotImplementedError, 'Must implement visit_var_stmt'
         end
+
+        def visit_while_stmt(expr)
+          raise NotImplementedError, 'Must implement visit_while_stmt'
+        end
       end
 
       def accept(visitor)
@@ -80,6 +84,21 @@ module Lox
 
         def accept(visitor)
           visitor.visit_var_stmt(self)
+        end
+      end
+
+      class While < Stmt
+        # @condition : Expr
+        # @body : Stmt
+        attr_reader :condition, :body
+
+        def initialize(condition, body)
+          @condition = condition
+          @body = body
+        end
+
+        def accept(visitor)
+          visitor.visit_while_stmt(self)
         end
       end
     end
