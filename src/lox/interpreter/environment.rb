@@ -5,6 +5,8 @@ require_relative 'runtime_error'
 module Lox
   module Interpreter
     class Environment
+      attr_reader :enclosing, :values
+      
       def initialize(enclosing = nil)
         @enclosing = enclosing
         @values = {}
@@ -12,6 +14,20 @@ module Lox
 
       def define(name, value)
         @values[name] = value
+      end
+
+      def ancestor(distance)
+        environment = self
+        distance.times { environment = environment.enclosing }
+        environment
+      end
+
+      def get_at(distance, name)
+        ancestor(distance).values[name]
+      end
+
+      def assign_at(distance, name, value)
+        ancestor(distance).values[name.lexeme] = value
       end
 
       def get(name)

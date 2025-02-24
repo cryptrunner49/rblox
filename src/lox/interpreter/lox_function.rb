@@ -32,11 +32,7 @@ module Lox
         rescue Lox::Interpreter::Return => e
           e.value # Return the value from the Return exception
         end
-        begin
-          interpreter.execute_block(@declaration.body, environment)
-        rescue Lox::Interpreter::Return => e
-          return e.value
-        end
+        
         nil
       end
     end

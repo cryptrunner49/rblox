@@ -4,16 +4,21 @@ require_relative '../syntax/expr'
 require_relative '../syntax/stmt'
 require_relative '../lexical/token_type'
 require_relative 'environment'
+require_relative 'resolver'
 
 module Lox
   module Interpreter
     class ExpressionEvaluator
       # Class-level variable
       GLOBALS = Lox::Interpreter::Environment.new.freeze
+      
+      attr_reader :globals
 
       # Instance variable
       def initialize
+        @locals = {}
         @environment = GLOBALS
+        @globals = GLOBALS
 
         @environment.define('clock', Class.new do
           include Lox::Interpreter::LoxCallable
@@ -33,12 +38,16 @@ module Lox
       end
 
       def interpret(statements)
-        statements.each do |statement|
-          execute(statement)
+        resolver = Lox::Interpreter::Resolver.new(self)
+        resolver.resolve(statements)
+        begin
+          statements.each do |statement|
+            execute(statement)
+          end
+        rescue Lox::Interpreter::RuntimeError => e
+          Lox::Runner.runtime_error(e)
+          nil # Return nil to indicate failure
         end
-      rescue Lox::Interpreter::RuntimeError => e
-        Lox::Runner.runtime_error(e)
-        nil # Return nil to indicate failure
       end
 
       # Expr Visitor Methods
@@ -99,11 +108,8 @@ module Lox
         function = callee
 
         if arguments.length != function.arity
-          raise Lox::Interpreter::RuntimeError.new(expr.paren,
-                                                   "Expected #{function.arity} arguments but got #{arguments.length}.")
+          raise Lox::Interpreter::RuntimeError.new(expr.paren, "Expected #{function.arity} arguments but got #{arguments.length}.")
         end
-
-        function.call(self, arguments)
 
         function.call(self, arguments)
       end
@@ -153,18 +159,24 @@ module Lox
       end
 
       def visit_variable_expr(expr)
-        @environment.get(expr.name)
+        look_up_variable(expr.name, expr)
       end
 
       def visit_assign_expr(expr)
         value = evaluate(expr.value)
-        @environment.assign(expr.name, value)
+
+        distance = @locals[expr]
+        if distance
+          @environment.assign_at(distance, expr.name, value)
+        else
+          @interpreter.globals.assign(expr.name, value)
+        end
+
         value
       end
 
-      # Stmt Visitor Methods
       def visit_expression_stmt(stmt)
-        evaluate(stmt.expression) # No output, just evaluation
+        evaluate(stmt.expression)
         nil
       end
 
@@ -206,7 +218,20 @@ module Lox
         end
       end
 
+      def resolve(expr, depth)
+        @locals[expr] = depth
+      end
+
       private
+
+      def look_up_variable(name, expr)
+        distance = @locals[expr]
+        if distance
+          @environment.get_at(distance, name.lexeme)
+        else
+          @globals.get(name)
+        end
+      end
 
       def evaluate(expr)
         expr.accept(self)
