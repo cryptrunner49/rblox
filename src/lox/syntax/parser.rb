@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../interpreter/lox_callable.rb'
+require_relative '../interpreter/lox_callable'
 require_relative '../interpreter/lox_function'
 require_relative '../interpreter/return'
 require_relative '../lexical/token'

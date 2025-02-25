@@ -32,7 +32,7 @@ module Lox
         rescue Lox::Interpreter::Return => e
           e.value # Return the value from the Return exception
         end
-        
+
         nil
       end
     end

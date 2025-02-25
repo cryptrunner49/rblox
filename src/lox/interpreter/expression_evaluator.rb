@@ -11,7 +11,7 @@ module Lox
     class ExpressionEvaluator
       # Class-level variable
       GLOBALS = Lox::Interpreter::Environment.new.freeze
-      
+
       attr_reader :globals
 
       # Instance variable
@@ -108,7 +108,8 @@ module Lox
         function = callee
 
         if arguments.length != function.arity
-          raise Lox::Interpreter::RuntimeError.new(expr.paren, "Expected #{function.arity} arguments but got #{arguments.length}.")
+          raise Lox::Interpreter::RuntimeError.new(expr.paren,
+                                                   "Expected #{function.arity} arguments but got #{arguments.length}.")
         end
 
         function.call(self, arguments)
@@ -222,6 +223,14 @@ module Lox
         @locals[expr] = depth
       end
 
+      def evaluate(expr)
+        expr.accept(self)
+      end
+
+      def execute(stmt)
+        stmt.accept(self)
+      end
+
       private
 
       def look_up_variable(name, expr)
@@ -231,14 +240,6 @@ module Lox
         else
           @globals.get(name)
         end
-      end
-
-      def evaluate(expr)
-        expr.accept(self)
-      end
-
-      def execute(stmt)
-        stmt.accept(self)
       end
 
       def is_truthy(object)

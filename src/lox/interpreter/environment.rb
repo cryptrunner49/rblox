@@ -6,7 +6,7 @@ module Lox
   module Interpreter
     class Environment
       attr_reader :enclosing, :values
-      
+
       def initialize(enclosing = nil)
         @enclosing = enclosing
         @values = {}
@@ -34,7 +34,7 @@ module Lox
         return @values[name.lexeme] if @values.key?(name.lexeme)
         return @enclosing.get(name) if @enclosing
 
-        raise Lox::RuntimeError.new(name, "Undefined variable '#{name.lexeme}'.")
+        raise Lox::Interpreter::RuntimeError.new(name, "Undefined variable '#{name.lexeme}'.")
       end
 
       def assign(name, value)
@@ -46,7 +46,7 @@ module Lox
           @enclosing.assign(name, value)
           return
         end
-        raise Lox::RuntimeError.new(name, "Undefined variable '#{name.lexeme}'.")
+        raise Lox::Interpreter::RuntimeError.new(name, "Undefined variable '#{name.lexeme}'.")
       end
     end
   end

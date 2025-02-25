@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
-# spec/interpreter_spec.rb
 require 'rspec'
 require 'stringio'
 
 require_relative '../src/lox/runner'
 
-module Lox
-  RSpec.describe Runner do
+module Spec
+  RSpec.describe Lox::Runner do
     def capture_stdout
       original_stdout = $stdout
       $stdout = StringIO.new
@@ -27,7 +26,7 @@ module Lox
           }
           print x;
         LOX
-        output = capture_stdout { Runner.run(source) }
+        output = capture_stdout { Lox::Runner.run(source) }
         expect(output).to include('inner')
         expect(output).to include('outer')
       end
@@ -36,13 +35,13 @@ module Lox
     context 'Operator Precedence' do
       it 'evaluates 1 + 2 * 3 with multiplication taking precedence' do
         source = 'print 1 + 2 * 3;'
-        output = capture_stdout { Runner.run(source) }
+        output = capture_stdout { Lox::Runner.run(source) }
         expect(output).to include('7')
       end
 
       it 'evaluates (1 + 2) * 3 with parentheses altering precedence' do
         source = 'print (1 + 2) * 3;'
-        output = capture_stdout { Runner.run(source) }
+        output = capture_stdout { Lox::Runner.run(source) }
         expect(output).to include('9')
       end
     end
