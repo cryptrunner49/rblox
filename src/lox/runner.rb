@@ -19,9 +19,7 @@ module Lox
       @had_error = false
       @had_runtime_error = false
 
-      @had_error = false
-
-      EXIT_MESSAGE = "\nExiting rblox. Goodbye!".freeze
+      EXIT_MESSAGE = "\nExiting rblox. Goodbye!".freeze unless defined?(EXIT_MESSAGE)
 
       def main(args)
         if args.length > 1
@@ -265,12 +263,12 @@ module Lox
       identifier: :white,
       operator: :magenta,
       punctuation: :white
-    }.freeze
+    }.freeze unless defined?(TOKEN_COLORS)
     BRACKET_PAIRS = {
       '{' => '}', '}' => '{',
       '(' => ')', ')' => '(',
       '[' => ']', ']' => '['
-    }.freeze
+    }.freeze unless defined?(TOKEN_COLORS)
 
     def self.highlight(code)
       analyzer = Lox::Lexical::Analyzer.new(code)
