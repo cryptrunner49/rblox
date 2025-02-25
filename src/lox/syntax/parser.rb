@@ -55,7 +55,9 @@ module Lox
       end
 
       def declaration
-        if match(Lexical::TokenType::FUN)
+        if match(Lexical::TokenType::CLASS)
+          class_declaration
+        elsif match(Lexical::TokenType::FUN)
           function 'function'
         elsif match(Lox::Lexical::TokenType::VAR)
           var_declaration
@@ -65,6 +67,19 @@ module Lox
       rescue ParseError
         synchronize
         nil
+      end
+
+      def class_declaration
+        name = consume(Lox::Lexical::TokenType::IDENTIFIER, "Expect class name.")
+        consume(Lox::Lexical::TokenType::LEFT_BRACE, "Expect '{' before class body.")
+        
+        methods = []
+        while !check(Lox::Lexical::TokenType::RIGHT_BRACE) && !at_end?
+          methods << function("method")
+        end
+        
+        consume(Lox::Lexical::TokenType::RIGHT_BRACE, "Expect '}' after class body.")
+        Lox::Syntax::Stmt::Class.new(name, methods)
       end
 
       def function(kind)
@@ -177,9 +192,13 @@ module Lox
         expr = or_
         if match(Lox::Lexical::TokenType::EQUAL)
           equals = previous
-          value = assignment
-          return Syntax::Expr::Assign.new(expr.name, value) if expr.is_a?(Syntax::Expr::Variable)
-
+          value = assignment  # Recurse for chained assignments
+          if expr.is_a?(Syntax::Expr::Variable)
+            return Syntax::Expr::Assign.new(expr.name, value)
+          elsif expr.is_a?(Lox::Syntax::Expr::Get)
+            get = expr
+            return Lox::Syntax::Expr::Set.new(get.object, get.name, value)
+          end
           error(equals, 'Invalid assignment target.')
         end
         expr
@@ -268,9 +287,14 @@ module Lox
       def call
         expr = primary
         loop do
-          break unless match(Lox::Lexical::TokenType::LEFT_PAREN)
-
-          expr = finish_call(expr)
+          if match(Lox::Lexical::TokenType::LEFT_PAREN)
+            expr = finish_call(expr)
+          elsif match(Lox::Lexical::TokenType::DOT)
+            name = consume(Lox::Lexical::TokenType::IDENTIFIER, "Expect property name after '.'.")
+            expr = Lox::Syntax::Expr::Get.new(expr, name)
+          else
+            break
+          end
         end
         expr
       end
@@ -297,6 +321,8 @@ module Lox
           return Syntax::Expr::Literal.new(nil)
         elsif match(Lox::Lexical::TokenType::NUMBER, Lox::Lexical::TokenType::STRING)
           return Syntax::Expr::Literal.new(previous.literal)
+        elsif match(Lox::Lexical::TokenType::THIS)
+          return Syntax::Expr::This.new(previous)
         elsif match(Lox::Lexical::TokenType::IDENTIFIER)
           return Syntax::Expr::Variable.new(previous)
         elsif match(Lox::Lexical::TokenType::LEFT_PAREN)

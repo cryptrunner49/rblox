@@ -52,6 +52,8 @@ module Lox
       # End of file
       EOF = :EOF
 
+      ERROR = :ERROR
+
       # Get all token types as an array
       def self.all_types
         constants.map { |c| const_get(c) }

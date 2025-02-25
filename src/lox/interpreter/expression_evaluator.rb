@@ -5,6 +5,10 @@ require_relative '../syntax/stmt'
 require_relative '../lexical/token_type'
 require_relative 'environment'
 require_relative 'resolver'
+require_relative 'lox_class'
+require_relative 'lox_function'
+require_relative 'environment'
+require_relative 'runtime_error'
 
 module Lox
   module Interpreter
@@ -70,6 +74,20 @@ module Lox
         evaluate(expr.right)
       end
 
+      def visit_set_expr(expr)
+        object = evaluate(expr.object)
+        unless object.is_a?(Lox::Interpreter::LoxInstance)
+          raise Lox::Interpreter::RuntimeError.new(expr.name, "Only instances have fields.")
+        end
+        value = evaluate(expr.value)
+        object.set(expr.name, value)
+        value
+      end
+
+      def visit_this_expr(expr)
+        look_up_variable(expr.keyword, expr)
+      end      
+
       def visit_while_stmt(stmt)
         execute(stmt.body) while is_truthy(evaluate(stmt.condition))
         nil
@@ -113,6 +131,15 @@ module Lox
         end
 
         function.call(self, arguments)
+      end
+
+      def visit_get_expr(expr)
+        object = evaluate(expr.object)
+        if object.is_a?(Lox::Interpreter::LoxInstance)
+          object.get(expr.name)
+        else
+          raise Lox::Interpreter::RuntimeError.new(expr.name, "Only instances have properties.")
+        end
       end
 
       def visit_binary_expr(expr)
@@ -170,7 +197,7 @@ module Lox
         if distance
           @environment.assign_at(distance, expr.name, value)
         else
-          @interpreter.globals.assign(expr.name, value)
+          @globals.assign(expr.name, value)
         end
 
         value
@@ -182,7 +209,7 @@ module Lox
       end
 
       def visit_function_stmt(stmt)
-        function = Lox::Interpreter::LoxFunction.new(stmt, @environment)
+        function = Lox::Interpreter::LoxFunction.new(stmt, @environment, false)
         @environment.define(stmt.name.lexeme, function)
         nil
       end
@@ -206,6 +233,18 @@ module Lox
 
       def visit_block_stmt(stmt)
         execute_block(stmt.statements, Lox::Interpreter::Environment.new(@environment))
+        nil
+      end
+
+      def visit_class_stmt(stmt)
+        @environment.define(stmt.name.lexeme, nil)
+        methods = {}
+        stmt.methods.each do |method|
+          function = Lox::Interpreter::LoxFunction.new(method, @environment, method.name.lexeme.equal?("init"))
+          methods[method.name.lexeme] = function
+        end
+        klass = Lox::Interpreter::LoxClass.new(stmt.name.lexeme, methods)
+        @environment.assign(stmt.name, klass)
         nil
       end
 

@@ -186,6 +186,16 @@ module Lox
         end
       end
 
+      def report(line, where, message)
+        warn "[line #{line}] Error#{where}: #{message}".yellow
+        @had_error = true
+      end
+
+      def runtime_error(error)
+        warn "#{error.message}\n[line #{error.token.line}]"
+        @had_runtime_error = true
+      end
+
       private
 
       def balanced_brackets?(code)
@@ -243,15 +253,7 @@ module Lox
       #  warn "  " + (" " * (where.to_i - 1)) + "^"
       # end
 
-      def report(line, where, message)
-        warn "[line #{line}] Error#{where}: #{message}".yellow
-        @had_error = true
-      end
-
-      def runtime_error(error)
-        warn "#{error.message}\n[line #{error.token.line}]"
-        @had_runtime_error = true
-      end
+      
     end
   end
 

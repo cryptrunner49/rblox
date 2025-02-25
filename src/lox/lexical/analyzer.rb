@@ -2,6 +2,7 @@
 
 require_relative 'token'
 require_relative 'token_type'
+require_relative '../../lox/runner'
 
 module Lox
   module Lexical
@@ -9,22 +10,22 @@ module Lox
       attr_reader :source, :tokens
 
       KEYWORDS = {
-        'and' => TokenType::AND,
-        'class' => TokenType::CLASS,
-        'else' => TokenType::ELSE,
-        'false' => TokenType::FALSE,
-        'for' => TokenType::FOR,
-        'fun' => TokenType::FUN,
-        'if' => TokenType::IF,
-        'nil' => TokenType::NIL,
-        'or' => TokenType::OR,
-        'print' => TokenType::PRINT,
-        'return' => TokenType::RETURN,
-        'super' => TokenType::SUPER,
-        'this' => TokenType::THIS,
-        'true' => TokenType::TRUE,
-        'var' => TokenType::VAR,
-        'while' => TokenType::WHILE
+        'and' => Lox::Lexical::TokenType::AND,
+        'class' => Lox::Lexical::TokenType::CLASS,
+        'else' => Lox::Lexical::TokenType::ELSE,
+        'false' => Lox::Lexical::TokenType::FALSE,
+        'for' => Lox::Lexical::TokenType::FOR,
+        'fun' => Lox::Lexical::TokenType::FUN,
+        'if' => Lox::Lexical::TokenType::IF,
+        'nil' => Lox::Lexical::TokenType::NIL,
+        'or' => Lox::Lexical::TokenType::OR,
+        'print' => Lox::Lexical::TokenType::PRINT,
+        'return' => Lox::Lexical::TokenType::RETURN,
+        'super' => Lox::Lexical::TokenType::SUPER,
+        'this' => Lox::Lexical::TokenType::THIS,
+        'true' => Lox::Lexical::TokenType::TRUE,
+        'var' => Lox::Lexical::TokenType::VAR,
+        'while' => Lox::Lexical::TokenType::WHILE
       }.freeze
 
       def initialize(source)
@@ -97,7 +98,7 @@ module Lox
           elsif alpha?(c)
             identifier
           else
-            Lox::Interpreter.error(@line, 'Unexpected character.')
+            Lox::Runner.error(Token.new(TokenType::ERROR, @source[@start...@current], nil, @line), 'Unexpected character.')
           end
         end
       end

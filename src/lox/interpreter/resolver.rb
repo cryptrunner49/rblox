@@ -9,7 +9,13 @@ module Lox
     class Resolver
       FUNCTION_TYPES = {
         none: :none,
-        function: :function
+        function: :function,
+        initializer: :initializer,
+        method: :method
+      }.freeze
+      CLASS_TYPES = {
+        none: :none,
+        class: :class
       }.freeze
 
       # The interpreter is used to associate resolved variables with their scopes.
@@ -21,6 +27,7 @@ module Lox
         @locals = {}
         @scopes = [] # Each scope is a Hash mapping variable names (String) to Boolean
         @current_function = :none # Using symbols for enum-like behavior
+        @current_class = :none
       end
 
       # Statement visitor methods
@@ -109,6 +116,30 @@ module Lox
         nil
       end
 
+      def visit_class_stmt(stmt)
+        enclosing_class = @current_class
+        @current_class = :class
+
+        declare(stmt.name)
+        define(stmt.name)
+
+        begin_scope
+        @scopes.last["this"] = true
+
+        stmt.methods.each do |method|
+          declaration = FUNCTION_TYPES[:method]
+          if (method.name.lexeme.equal?("init"))
+            declaration = :initializer
+          end
+          resolve_function(method, declaration)
+        end
+
+        end_scope
+
+        @current_class = enclosing_class
+        nil
+      end     
+
       def resolve_function(function, type)
         enclosing_function = @current_function
         @current_function = type
@@ -145,6 +176,10 @@ module Lox
         if @current_function == FUNCTION_TYPES[:none]
           Lox::Runner.error(stmt.keyword, "Can't return from top-level code.")
         end
+        if @current_function == :initializer
+          Lox.error(stmt.keyword, "Can't return a value from an initializer.")
+        end
+        
         resolve_expr(stmt.value) unless stmt.value.nil?
         nil
       end
@@ -169,6 +204,11 @@ module Lox
         nil
       end
 
+      def visit_get_expr(expr)
+        resolve_expr(expr.object)
+        nil
+      end
+
       def visit_grouping_expr(expr)
         resolve_expr(expr.expression)
         nil
@@ -181,6 +221,22 @@ module Lox
       def visit_logical_expr(expr)
         resolve_expr(expr.left)
         resolve_expr(expr.right)
+        nil
+      end
+
+      def visit_set_expr(expr)
+        resolve_expr(expr.value)
+        resolve_expr(expr.object)
+        nil
+      end
+
+      def visit_this_expr(expr)
+        if @current_class == :none
+          Lox.error(expr.keyword, "Can't use 'this' outside of a class.")
+          return nil
+        end
+
+        resolve_local(expr, expr.keyword)
         nil
       end
 

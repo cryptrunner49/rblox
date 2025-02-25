@@ -2,7 +2,6 @@
 
 require 'rspec'
 require 'stringio'
-
 require_relative '../src/lox/interpreter/lox_function'
 require_relative '../src/lox/interpreter/expression_evaluator'
 require_relative '../src/lox/syntax/stmt'
@@ -16,7 +15,7 @@ module Spec
       let(:param) { Lox::Lexical::Token.new(Lox::Lexical::TokenType::IDENTIFIER, "a", nil, 1) }
       let(:print_stmt) { Lox::Syntax::Stmt::Print.new(Lox::Syntax::Expr::Variable.new(param)) }
       let(:stmt) { Lox::Syntax::Stmt::Function.new(token, [param], [print_stmt]) }
-      let(:function) { Lox::Interpreter::LoxFunction.new(stmt, evaluator.globals) }
+      let(:function) { Lox::Interpreter::LoxFunction.new(stmt, evaluator.globals, false) }  # Add false for is_initializer
 
       def capture_stdout
         original_stdout = $stdout
@@ -28,9 +27,7 @@ module Spec
       end
 
       it 'executes a function with a parameter' do
-        # Define the function in the environment via interpret
         evaluator.interpret([stmt])
-        # Call the function via an expression
         call_expr = Lox::Syntax::Expr::Call.new(
           Lox::Syntax::Expr::Variable.new(token),
           Lox::Lexical::Token.new(Lox::Lexical::TokenType::RIGHT_PAREN, ")", nil, 1),

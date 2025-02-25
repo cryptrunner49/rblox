@@ -7,161 +7,182 @@ require_relative '../lexical/token'
 module Lox
   module Syntax
     class Stmt
-      module Visitor
-        def visit_block_stmt(expr)
-          raise NotImplementedError, 'Must implement visit_block_stmt'
-        end
+    module Visitor
+      def visit_block_stmt(expr)
+        raise NotImplementedError, "Must implement visit_block_stmt"
+      end
 
-        def visit_expression_stmt(expr)
-          raise NotImplementedError, 'Must implement visit_expression_stmt'
-        end
+      def visit_class_stmt(expr)
+        raise NotImplementedError, "Must implement visit_class_stmt"
+      end
 
-        def visit_function_stmt(expr)
-          raise NotImplementedError, 'Must implement visit_function_stmt'
-        end
+      def visit_expression_stmt(expr)
+        raise NotImplementedError, "Must implement visit_expression_stmt"
+      end
 
-        def visit_if_stmt(expr)
-          raise NotImplementedError, 'Must implement visit_if_stmt'
-        end
+      def visit_function_stmt(expr)
+        raise NotImplementedError, "Must implement visit_function_stmt"
+      end
 
-        def visit_print_stmt(expr)
-          raise NotImplementedError, 'Must implement visit_print_stmt'
-        end
+      def visit_if_stmt(expr)
+        raise NotImplementedError, "Must implement visit_if_stmt"
+      end
 
-        def visit_return_stmt(expr)
-          raise NotImplementedError, 'Must implement visit_return_stmt'
-        end
+      def visit_print_stmt(expr)
+        raise NotImplementedError, "Must implement visit_print_stmt"
+      end
 
-        def visit_var_stmt(expr)
-          raise NotImplementedError, 'Must implement visit_var_stmt'
-        end
+      def visit_return_stmt(expr)
+        raise NotImplementedError, "Must implement visit_return_stmt"
+      end
 
-        def visit_while_stmt(expr)
-          raise NotImplementedError, 'Must implement visit_while_stmt'
-        end
+      def visit_var_stmt(expr)
+        raise NotImplementedError, "Must implement visit_var_stmt"
+      end
+
+      def visit_while_stmt(expr)
+        raise NotImplementedError, "Must implement visit_while_stmt"
+      end
+
+    end
+
+      def accept(visitor)
+        raise NotImplementedError, "Subclasses must implement accept"
+      end
+
+    class Block < Stmt
+      # @statements : List<Stmt>
+      attr_reader :statements
+
+      def initialize(statements)
+        @statements = statements
       end
 
       def accept(visitor)
-        raise NotImplementedError, 'Subclasses must implement accept'
+        visitor.visit_block_stmt(self)
+      end
+    end
+
+    class Class < Stmt
+      # @name : Token
+      # @methods : Stmt[]
+      attr_reader :name, :methods
+
+      def initialize(name, methods)
+        @name = name
+        @methods = methods
       end
 
-      class Block < Stmt
-        # @statements : List<Stmt>
-        attr_reader :statements
+      def accept(visitor)
+        visitor.visit_class_stmt(self)
+      end
+    end
 
-        def initialize(statements)
-          @statements = statements
-        end
+    class Expression < Stmt
+      # @expression : Expr
+      attr_reader :expression
 
-        def accept(visitor)
-          visitor.visit_block_stmt(self)
-        end
+      def initialize(expression)
+        @expression = expression
       end
 
-      class Expression < Stmt
-        # @expression : Expr
-        attr_reader :expression
+      def accept(visitor)
+        visitor.visit_expression_stmt(self)
+      end
+    end
 
-        def initialize(expression)
-          @expression = expression
-        end
+    class Function < Stmt
+      # @name : Token
+      # @parameters : Token[]
+      # @body : Stmt[]
+      attr_reader :name, :parameters, :body
 
-        def accept(visitor)
-          visitor.visit_expression_stmt(self)
-        end
+      def initialize(name, parameters, body)
+        @name = name
+        @parameters = parameters
+        @body = body
       end
 
-      class Function < Stmt
-        # @name : Token
-        # @parameters : Token[]
-        # @body : Stmt[]
-        attr_reader :name, :parameters, :body
+      def accept(visitor)
+        visitor.visit_function_stmt(self)
+      end
+    end
 
-        def initialize(name, parameters, body)
-          @name = name
-          @parameters = parameters
-          @body = body
-        end
+    class If < Stmt
+      # @condition : Expr
+      # @then_branch : Stmt
+      # @else_branch : Stmt
+      attr_reader :condition, :then_branch, :else_branch
 
-        def accept(visitor)
-          visitor.visit_function_stmt(self)
-        end
+      def initialize(condition, then_branch, else_branch)
+        @condition = condition
+        @then_branch = then_branch
+        @else_branch = else_branch
       end
 
-      class If < Stmt
-        # @condition : Expr
-        # @then_branch : Stmt
-        # @else_branch : Stmt
-        attr_reader :condition, :then_branch, :else_branch
+      def accept(visitor)
+        visitor.visit_if_stmt(self)
+      end
+    end
 
-        def initialize(condition, then_branch, else_branch)
-          @condition = condition
-          @then_branch = then_branch
-          @else_branch = else_branch
-        end
+    class Print < Stmt
+      # @expression : Expr
+      attr_reader :expression
 
-        def accept(visitor)
-          visitor.visit_if_stmt(self)
-        end
+      def initialize(expression)
+        @expression = expression
       end
 
-      class Print < Stmt
-        # @expression : Expr
-        attr_reader :expression
+      def accept(visitor)
+        visitor.visit_print_stmt(self)
+      end
+    end
 
-        def initialize(expression)
-          @expression = expression
-        end
+    class Return < Stmt
+      # @keyword : Token
+      # @value : Expr
+      attr_reader :keyword, :value
 
-        def accept(visitor)
-          visitor.visit_print_stmt(self)
-        end
+      def initialize(keyword, value)
+        @keyword = keyword
+        @value = value
       end
 
-      class Return < Stmt
-        # @keyword : Token
-        # @value : Expr
-        attr_reader :keyword, :value
+      def accept(visitor)
+        visitor.visit_return_stmt(self)
+      end
+    end
 
-        def initialize(keyword, value)
-          @keyword = keyword
-          @value = value
-        end
+    class Var < Stmt
+      # @name : Token
+      # @initializer : Expr
+      attr_reader :name, :initializer
 
-        def accept(visitor)
-          visitor.visit_return_stmt(self)
-        end
+      def initialize(name, initializer)
+        @name = name
+        @initializer = initializer
       end
 
-      class Var < Stmt
-        # @name : Token
-        # @initializer : Expr
-        attr_reader :name, :initializer
+      def accept(visitor)
+        visitor.visit_var_stmt(self)
+      end
+    end
 
-        def initialize(name, initializer)
-          @name = name
-          @initializer = initializer
-        end
+    class While < Stmt
+      # @condition : Expr
+      # @body : Stmt
+      attr_reader :condition, :body
 
-        def accept(visitor)
-          visitor.visit_var_stmt(self)
-        end
+      def initialize(condition, body)
+        @condition = condition
+        @body = body
       end
 
-      class While < Stmt
-        # @condition : Expr
-        # @body : Stmt
-        attr_reader :condition, :body
-
-        def initialize(condition, body)
-          @condition = condition
-          @body = body
-        end
-
-        def accept(visitor)
-          visitor.visit_while_stmt(self)
-        end
+      def accept(visitor)
+        visitor.visit_while_stmt(self)
       end
+    end
+
     end
   end
 end
