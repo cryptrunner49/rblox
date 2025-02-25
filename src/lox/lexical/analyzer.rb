@@ -98,7 +98,8 @@ module Lox
           elsif alpha?(c)
             identifier
           else
-            Lox::Runner.error(Token.new(TokenType::ERROR, @source[@start...@current], nil, @line), 'Unexpected character.')
+            Lox::Runner.error(Token.new(TokenType::ERROR, @source[@start...@current], nil, @line),
+                              'Unexpected character.')
           end
         end
       end

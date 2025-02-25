@@ -9,31 +9,34 @@ module Lox
     class LoxClass
       include Lox::Interpreter::LoxCallable
 
-      def initialize(name, methods = {})
+      def initialize(name, superclass, methods = {})
         @name = name
+        @superclass = superclass
         @methods = methods
       end
 
       def find_method(name)
-        @methods[name] if @methods.key?(name)
+        # Ensure @methods is a hash and check for the method
+        if @methods.is_a?(Hash) && @methods.key?(name)
+          @methods[name]
+        elsif @superclass
+          @superclass.find_method(name)
+        end
       end
 
       def call(interpreter, arguments)
-        instance = Lox::Interpreter::LoxInstance.new(self)  # Creates a new instance of this class
+        instance = Lox::Interpreter::LoxInstance.new(self) # Creates a new instance of this class
 
-        initializer = find_method("init")
-        if initializer
-          initializer.bind(instance).call(interpreter, arguments)
-        end
+        initializer = find_method('init')
+        initializer&.bind(instance)&.call(interpreter, arguments)
 
-        return instance
+        instance
       end
 
       def arity
-        initializer = find_method("init")
-        return 0 unless initializer
-        initializer.arity
-      end      
+        initializer = find_method('init')
+        initializer ? initializer.arity : 0
+      end
 
       def to_s
         @name
@@ -41,7 +44,7 @@ module Lox
 
       private
 
-      attr_reader :name, :methods
+      attr_reader :name, :superclass, :methods
     end
   end
 end

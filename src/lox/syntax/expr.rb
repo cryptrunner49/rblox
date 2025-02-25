@@ -40,6 +40,10 @@ module Lox
         raise NotImplementedError, "Must implement visit_set_expr"
       end
 
+      def visit_super_expr(expr)
+        raise NotImplementedError, "Must implement visit_super_expr"
+      end
+
       def visit_this_expr(expr)
         raise NotImplementedError, "Must implement visit_this_expr"
       end
@@ -179,6 +183,21 @@ module Lox
 
       def accept(visitor)
         visitor.visit_set_expr(self)
+      end
+    end
+
+    class Super < Expr
+      # @keyword : Token
+      # @method : Token
+      attr_reader :keyword, :method
+
+      def initialize(keyword, method)
+        @keyword = keyword
+        @method = method
+      end
+
+      def accept(visitor)
+        visitor.visit_super_expr(self)
       end
     end
 

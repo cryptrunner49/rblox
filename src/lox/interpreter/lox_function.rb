@@ -16,9 +16,9 @@ module Lox
 
       def bind(instance)
         environment = Lox::Interpreter::Environment.new(@closure)
-        environment.define("this", instance)
+        environment.define('this', instance)
         LoxFunction.new(@declaration, environment, @is_initializer)
-      end      
+      end
 
       def to_s
         "<fn #{@declaration.name.lexeme}>"
@@ -37,11 +37,13 @@ module Lox
           interpreter.execute_block(@declaration.body, environment)
           nil # Default return value if no return statement
         rescue Lox::Interpreter::Return => e
-          return closure.get_at(0, "this") if is_initializer
+          return closure.get_at(0, 'this') if @is_initializer
+
           e.value # Return the value from the Return exception
         end
 
-        return closure[0, "this"] if @is_initializer
+        return closure[0, 'this'] if @is_initializer
+
         nil
       end
     end

@@ -1,0 +1,369 @@
+// Text-based Adventure Game in Lox
+// Demonstrates inheritance, closures, and game logic
+
+// Create a random number generator using linear congruential generator
+fun makeRandom() {
+  var seed = clock() * 1000;
+  
+  fun next() {
+    // Simple LCG parameters
+    var a = 1664525;
+    var c = 1013904223;
+    var m = 4294967296; // 2^32
+    
+    seed = (a * seed + c) / m; // Use division instead of modulo
+    return seed / m; // Return value between 0 and 1
+  }
+  
+  // Return random number between min and max
+  fun range(min, max) {
+    return min + next() * (max - min);
+  }
+  
+  // Return random integer between min and max (inclusive)
+  fun rangeInt(min, max) {
+    return min + (next() * (max - min + 1)).floor(); // Fixed integer range calculation
+  }
+  
+  class Temp {
+    init(value) {
+      this.value = value;
+    }
+  }
+  var result = Temp(1);
+  result.next = next;
+  result.range = range;
+  result.rangeInt = rangeInt;
+  return result;
+}
+
+var random = makeRandom();
+
+// Base Character class
+class Character {
+  init(name, hp, attack, defense) {
+    this.name = name;
+    this.maxHp = hp;
+    this.hp = hp;
+    this.baseAttack = attack;
+    this.baseDefense = defense;
+    this.level = 1;
+    this.exp = 0;
+  }
+  
+  displayStats() {
+    print "---------------------";
+    print this.name + " (Level " + this.level + ")";
+    print "HP: " + this.hp + "/" + this.maxHp;
+    print "Attack: " + this.getAttack();
+    print "Defense: " + this.getDefense();
+    print "EXP: " + this.exp;
+    print "---------------------";
+  }
+  
+  getAttack() {
+    return this.baseAttack + (this.level * 2);
+  }
+  
+  getDefense() {
+    return this.baseDefense + this.level;
+  }
+  
+  takeDamage(amount) {
+    var actualDamage = amount - this.getDefense();
+    if (actualDamage < 1) actualDamage = 1;
+    
+    this.hp = this.hp - actualDamage;
+    if (this.hp < 0) this.hp = 0;
+    
+    print this.name + " takes " + actualDamage + " damage!";
+    if (this.hp <= 0) {
+      print this.name + " has been defeated!";
+    }
+    
+    return actualDamage;
+  }
+  
+  attack(target) {
+    var damageMultiplier = 1 + random.range(0, 0.5);
+    var damage = this.getAttack() * damageMultiplier;
+    
+    print this.name + " attacks " + target.name + "!";
+    return target.takeDamage(damage);
+  }
+  
+  gainExp(amount) {
+    this.exp = this.exp + amount; // Simplified increment
+    print this.name + " gained " + amount + " experience!";
+    
+    // Check for level up
+    if (this.exp >= this.level * 100) {
+      this.levelUp();
+    }
+  }
+  
+  levelUp() {
+    this.level = this.level + 1; // Simplified increment
+    this.maxHp = this.maxHp + 20; // Simplified increment
+    this.hp = this.maxHp;
+    this.baseAttack = this.baseAttack + 5; // Simplified increment
+    this.baseDefense = this.baseDefense + 3; // Simplified increment
+    
+    print "*** " + this.name + " reached level " + this.level + "! ***";
+    print "HP increased to " + this.maxHp;
+    print "Attack increased to " + this.getAttack();
+    print "Defense increased to " + this.getDefense();
+  }
+  
+  heal(amount) {
+    this.hp = this.hp + amount;
+    if (this.hp > this.maxHp) this.hp = this.maxHp;
+    print this.name + " healed " + amount + " HP.";
+  }
+  
+  isAlive() {
+    return this.hp > 0;
+  }
+  
+  specialAbility(target) {
+    print this.name + " has no special ability.";
+  }
+}
+
+// Warrior class - high HP and defense
+class Warrior < Character {
+  init(name) {
+    super.init(name, 120, 15, 10);
+    this.rage = 0;
+  }
+  
+  attack(target) {
+    var damage = super.attack(target);
+    this.rage = this.rage + damage / 10;
+    return damage;
+  }
+  
+  specialAbility(target) {
+    if (this.rage >= 5) {
+      print this.name + " uses CRUSHING BLOW!";
+      var damageMultiplier = 2.5;
+      var damage = this.getAttack() * damageMultiplier;
+      target.takeDamage(damage);
+      this.rage = this.rage - 5;
+      print this.name + "'s rage decreases to " + this.rage;
+    } else {
+      print this.name + " doesn't have enough rage! (Need 5, has " + this.rage + ")";
+    }
+  }
+  
+  displayStats() {
+    super.displayStats();
+    print "Rage: " + this.rage;
+  }
+}
+
+// Mage class - lower HP, high attack, magic abilities
+class Mage < Character {
+  init(name) {
+    super.init(name, 80, 20, 5);
+    this.mana = 100;
+  }
+  
+  attack(target) {
+    print this.name + " casts Arcane Bolt at " + target.name + "!";
+    this.mana = this.mana + 10;
+    if (this.mana > 100) this.mana = 100;
+    
+    var damageMultiplier = 1.2 + random.range(0, 0.3);
+    var damage = this.getAttack() * damageMultiplier;
+    return target.takeDamage(damage);
+  }
+  
+  specialAbility(target) {
+    if (this.mana >= 30) {
+      print this.name + " casts FIREBALL!";
+      var damageMultiplier = 3.0;
+      var damage = this.getAttack() * damageMultiplier;
+      target.takeDamage(damage);
+      this.mana = this.mana - 30;
+      print this.name + "'s mana decreases to " + this.mana;
+    } else {
+      print this.name + " doesn't have enough mana! (Need 30, has " + this.mana + ")";
+    }
+  }
+  
+  displayStats() {
+    super.displayStats();
+    print "Mana: " + this.mana;
+  }
+}
+
+// Monster classes
+class Monster < Character {
+  init(name, level) {
+    var hp = 50 + level * 10;
+    var attack = 10 + level * 2;
+    var defense = 5 + level;
+    super.init(name, hp, attack, defense);
+    this.level = level;
+    this.expValue = level * 50;
+  }
+}
+
+class Goblin < Monster {
+  init(level) {
+    super.init("Goblin", level);
+    // Goblins are faster but weaker
+    this.baseAttack = this.baseAttack - 2;
+  }
+  
+  attack(target) {
+    // 20% chance for double attack
+    var damage = super.attack(target);
+    if (random.next() < 0.2) {
+      print this.name + " attacks again with surprising speed!";
+      damage = damage + super.attack(target);
+    }
+    return damage;
+  }
+}
+
+class Troll < Monster {
+  init(level) {
+    super.init("Troll", level);
+    // Trolls are stronger but slower
+    this.maxHp = this.maxHp + 30;
+    this.hp = this.maxHp;
+    this.baseAttack = this.baseAttack + 5;
+    this.baseDefense = this.baseDefense + 3;
+  }
+  
+  specialAbility(target) {
+    // Trolls can regenerate
+    if (random.next() < 0.3) {
+      if (this.hp < this.maxHp) {
+        var healAmount = this.maxHp * 0.1;
+        print this.name + " regenerates some health!";
+        this.heal(healAmount);
+      }
+    }
+  }
+}
+
+// Game mechanics
+fun battle(player, monster) {
+  print "\n=== BATTLE START ===";
+  print player.name + " encounters a " + monster.name + "!";
+  
+  player.displayStats();
+  monster.displayStats();
+  
+  var turn = 1;
+  
+  while (true) {
+    if ((!player.isAlive()) or (!monster.isAlive())) {
+      break;
+    }
+
+    // Player's turn
+    print "Player's turn:";
+    var action = random.rangeInt(1, 10);
+    
+    if (action <= 7) {
+      // Normal attack (70% chance)
+      player.attack(monster);
+    } else {
+      // Special ability (30% chance)
+      player.specialAbility(monster);
+    }
+    
+    // Check if monster is defeated
+    if (!monster.isAlive()) {
+      print "\nVictory! " + monster.name + " has been defeated!";
+      player.gainExp(monster.expValue);
+      break;
+    }
+    
+    // Monster's turn
+    print "\nMonster's turn:";
+    action = random.rangeInt(1, 10);
+    
+    if (action <= 8) {
+      // Normal attack (80% chance)
+      monster.attack(player);
+    } else {
+      // Special ability (20% chance)
+      monster.specialAbility(player);
+    }
+    
+    // Check if player is defeated
+    if (!player.isAlive()) {
+      print "\nDefeat! " + player.name + " has been defeated!";
+      break;
+    }
+  }
+  
+  print "\n=== BATTLE END ===";
+  player.displayStats();
+  return;
+}
+
+// Adventure simulation
+fun adventure() {
+  print "=== WELCOME TO LOX ADVENTURE ===";
+  print "1. Select your character class:";
+  print "- Warrior (chosen)";
+  
+  var player = Warrior("Hero");
+  print "\nWelcome, " + player.name + " the Warrior!";
+  
+  // Begin adventure
+  print "\nYou set out on an adventure...";
+  
+  for (var i = 1; i <= 5; i = i + 1) {
+    //print "\n--- ADVENTURE DAY " + i + " ---";
+    
+    // Random encounter
+    var encounter = 3;
+    
+    if (encounter <= 7) {
+      // Combat encounter
+      var monsterType = 2;
+      var monsterLevel = i;
+      
+      var monster;
+      if (monsterType == 1) {
+        monster = Goblin(monsterLevel);
+      } else {
+        monster = Troll(monsterLevel);
+      }
+      
+      battle(player, monster);
+      
+      // Heal after battle
+      if (player.isAlive()) {
+        var healAmount = player.maxHp * 0.3;
+        print "\nYou rest and recover some strength.";
+        player.heal(healAmount);
+      } else {
+        print "\nGAME OVER. You were defeated on day " + i + ".";
+        break;
+      }
+    } else {
+      // Peaceful day
+      print "You travel without incident and find a safe place to rest.";
+      var healAmount = player.maxHp * 0.5;
+      player.heal(healAmount);
+    }
+  }
+  
+  if (player.isAlive()) {
+    print "\nCongratulations! You have completed your adventure!";
+    print "Final stats:";
+    player.displayStats();
+  }
+  return;
+}
+
+// Start the adventure!
+adventure();

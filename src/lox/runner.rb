@@ -250,25 +250,27 @@ module Lox
       #  warn "  #{source_line}"
       #  warn "  " + (" " * (where.to_i - 1)) + "^"
       # end
-
-      
     end
   end
 
   module SyntaxHighlighter
-    TOKEN_COLORS = {
-      keyword: :cyan,
-      string: :green,
-      number: :yellow,
-      identifier: :white,
-      operator: :magenta,
-      punctuation: :white
-    }.freeze unless defined?(TOKEN_COLORS)
-    BRACKET_PAIRS = {
-      '{' => '}', '}' => '{',
-      '(' => ')', ')' => '(',
-      '[' => ']', ']' => '['
-    }.freeze unless defined?(TOKEN_COLORS)
+    unless defined?(TOKEN_COLORS)
+      TOKEN_COLORS = {
+        keyword: :cyan,
+        string: :green,
+        number: :yellow,
+        identifier: :white,
+        operator: :magenta,
+        punctuation: :white
+      }.freeze
+    end
+    unless defined?(TOKEN_COLORS)
+      BRACKET_PAIRS = {
+        '{' => '}', '}' => '{',
+        '(' => ')', ')' => '(',
+        '[' => ']', ']' => '['
+      }.freeze
+    end
 
     def self.highlight(code)
       analyzer = Lox::Lexical::Analyzer.new(code)

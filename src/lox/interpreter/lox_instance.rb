@@ -3,7 +3,6 @@
 module Lox
   module Interpreter
     class LoxInstance
-
       def initialize(klass)
         @klass = klass
         @fields = {}
@@ -15,6 +14,7 @@ module Lox
         else
           method = @klass.find_method(name.lexeme)
           return method.bind(self) if method
+
           raise Lox::Interpreter::RuntimeError.new(name, "Undefined property '#{name.lexeme}'.")
         end
       end

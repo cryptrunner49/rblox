@@ -7,7 +7,6 @@ require_relative 'environment'
 require_relative 'resolver'
 require_relative 'lox_class'
 require_relative 'lox_function'
-require_relative 'environment'
 require_relative 'runtime_error'
 
 module Lox
@@ -44,6 +43,11 @@ module Lox
       def interpret(statements)
         resolver = Lox::Interpreter::Resolver.new(self)
         resolver.resolve(statements)
+        # If an error occurred, stop here
+        if Lox::Runner.had_error
+          return # Exit the method, skipping interpretation
+        end
+
         begin
           statements.each do |statement|
             execute(statement)
@@ -77,16 +81,34 @@ module Lox
       def visit_set_expr(expr)
         object = evaluate(expr.object)
         unless object.is_a?(Lox::Interpreter::LoxInstance)
-          raise Lox::Interpreter::RuntimeError.new(expr.name, "Only instances have fields.")
+          raise Lox::Interpreter::RuntimeError.new(expr.name, 'Only instances have fields.')
         end
+
         value = evaluate(expr.value)
         object.set(expr.name, value)
         value
       end
 
+      def visit_super_expr(expr)
+        distance = @locals[expr]
+        superclass = @environment.get_at(distance, 'super')
+
+        # Add error handling for nil superclass
+        raise Lox::Interpreter::RuntimeError.new(expr.keyword, 'Superclass not found.') if superclass.nil?
+
+        object = @environment.get_at(distance - 1, 'this')
+        method = superclass.find_method(expr.method.lexeme)
+
+        if method.nil?
+          raise Lox::Interpreter::RuntimeError.new(expr.method, "Undefined property '#{expr.method.lexeme}'.")
+        end
+
+        method.bind(object)
+      end
+
       def visit_this_expr(expr)
         look_up_variable(expr.keyword, expr)
-      end      
+      end
 
       def visit_while_stmt(stmt)
         execute(stmt.body) while is_truthy(evaluate(stmt.condition))
@@ -135,11 +157,11 @@ module Lox
 
       def visit_get_expr(expr)
         object = evaluate(expr.object)
-        if object.is_a?(Lox::Interpreter::LoxInstance)
-          object.get(expr.name)
-        else
-          raise Lox::Interpreter::RuntimeError.new(expr.name, "Only instances have properties.")
+        unless object.is_a?(Lox::Interpreter::LoxInstance)
+          raise Lox::Interpreter::RuntimeError.new(expr.name, 'Only instances have properties.')
         end
+
+        object.get(expr.name)
       end
 
       def visit_binary_expr(expr)
@@ -237,13 +259,32 @@ module Lox
       end
 
       def visit_class_stmt(stmt)
+        superclass = nil
+
+        if stmt.superclass
+          superclass = evaluate(stmt.superclass)
+          unless superclass.is_a?(Lox::Interpreter::LoxClass)
+            raise Lox::Interpreter::RuntimeError.new(stmt.superclass.name, 'Superclass must be a class.')
+          end
+        end
+
         @environment.define(stmt.name.lexeme, nil)
+
+        if stmt.superclass
+          @environment = Lox::Interpreter::Environment.new(@environment)
+          @environment.define('super', superclass)
+        end
+
         methods = {}
         stmt.methods.each do |method|
-          function = Lox::Interpreter::LoxFunction.new(method, @environment, method.name.lexeme.equal?("init"))
+          function = Lox::Interpreter::LoxFunction.new(method, @environment, method.name.lexeme.equal?('init'))
           methods[method.name.lexeme] = function
         end
-        klass = Lox::Interpreter::LoxClass.new(stmt.name.lexeme, methods)
+
+        klass = Lox::Interpreter::LoxClass.new(stmt.name.lexeme, superclass, methods)
+
+        @environment = @environment.enclosing if stmt.superclass && superclass
+
         @environment.assign(stmt.name, klass)
         nil
       end

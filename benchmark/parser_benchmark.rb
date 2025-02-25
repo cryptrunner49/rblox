@@ -31,7 +31,7 @@ Benchmark.bm(20) do |bm|
     bm.report("#{name} - Parsing:") { parser.parse }
 
     # Measure interpretation using parsed statements
-    statements = parser.parse  # Assign and use statements
+    statements = parser.parse # Assign and use statements
     bm.report("#{name} - Interpreting:") { evaluator.interpret(statements) }
   end
 end

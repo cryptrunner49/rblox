@@ -15,7 +15,8 @@ module Lox
       }.freeze
       CLASS_TYPES = {
         none: :none,
-        class: :class
+        class: :class,
+        subclass: :subclass
       }.freeze
 
       # The interpreter is used to associate resolved variables with their scopes.
@@ -123,22 +124,36 @@ module Lox
         declare(stmt.name)
         define(stmt.name)
 
+        if stmt.superclass && stmt.name.lexeme == stmt.superclass.name.lexeme
+          Lox::Runner.error(stmt.superclass.name, "A class can't inherit from itself.")
+        end
+
+        if stmt.superclass
+          @current_class = :subclass
+          resolve_expr(stmt.superclass)
+        end
+
+        if stmt.superclass
+          begin_scope
+          @scopes.last['super'] = true
+        end
+
         begin_scope
-        @scopes.last["this"] = true
+        @scopes.last['this'] = true
 
         stmt.methods.each do |method|
           declaration = FUNCTION_TYPES[:method]
-          if (method.name.lexeme.equal?("init"))
-            declaration = :initializer
-          end
+          declaration = :initializer if method.name.lexeme.equal?('init')
           resolve_function(method, declaration)
         end
 
         end_scope
 
+        end_scope if stmt.superclass
+
         @current_class = enclosing_class
         nil
-      end     
+      end
 
       def resolve_function(function, type)
         enclosing_function = @current_function
@@ -176,10 +191,8 @@ module Lox
         if @current_function == FUNCTION_TYPES[:none]
           Lox::Runner.error(stmt.keyword, "Can't return from top-level code.")
         end
-        if @current_function == :initializer
-          Lox.error(stmt.keyword, "Can't return a value from an initializer.")
-        end
-        
+        Lox.error(stmt.keyword, "Can't return a value from an initializer.") if @current_function == :initializer
+
         resolve_expr(stmt.value) unless stmt.value.nil?
         nil
       end
@@ -230,10 +243,24 @@ module Lox
         nil
       end
 
-      def visit_this_expr(expr)
+      def visit_super_expr(expr)
         if @current_class == :none
-          Lox.error(expr.keyword, "Can't use 'this' outside of a class.")
-          return nil
+          Lox::Runner.error(expr.keyword, "Can't use 'super' outside of a class.")
+        elsif @current_class != :subclass
+          Lox::Runner.error(expr.keyword, "Can't use 'super' in a class with no superclass.")
+        end
+
+        resolve_local(expr, expr.keyword)
+        nil
+      end
+
+      def visit_this_expr(expr)
+        if @current_class == :NONE
+          # Replace the Lox.error call with an exception
+          raise Lox::Interpreter::RuntimeError.new(
+            expr.keyword,
+            "Can't use 'this' outside of a class."
+          )
         end
 
         resolve_local(expr, expr.keyword)

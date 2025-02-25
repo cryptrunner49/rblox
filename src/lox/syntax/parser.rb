@@ -70,16 +70,21 @@ module Lox
       end
 
       def class_declaration
-        name = consume(Lox::Lexical::TokenType::IDENTIFIER, "Expect class name.")
-        consume(Lox::Lexical::TokenType::LEFT_BRACE, "Expect '{' before class body.")
-        
-        methods = []
-        while !check(Lox::Lexical::TokenType::RIGHT_BRACE) && !at_end?
-          methods << function("method")
+        name = consume(Lox::Lexical::TokenType::IDENTIFIER, 'Expect class name.')
+
+        superclass = nil
+        if match(Lox::Lexical::TokenType::LESS)
+          consume(Lox::Lexical::TokenType::IDENTIFIER, 'Expect superclass name.')
+          superclass = Lox::Syntax::Expr::Variable.new(previous)
         end
-        
+
+        consume(Lox::Lexical::TokenType::LEFT_BRACE, "Expect '{' before class body.")
+
+        methods = []
+        methods << function('method') while !check(Lox::Lexical::TokenType::RIGHT_BRACE) && !at_end?
+
         consume(Lox::Lexical::TokenType::RIGHT_BRACE, "Expect '}' after class body.")
-        Lox::Syntax::Stmt::Class.new(name, methods)
+        Lox::Syntax::Stmt::Class.new(name, superclass, methods)
       end
 
       def function(kind)
@@ -192,13 +197,14 @@ module Lox
         expr = or_
         if match(Lox::Lexical::TokenType::EQUAL)
           equals = previous
-          value = assignment  # Recurse for chained assignments
+          value = assignment # Recurse for chained assignments
           if expr.is_a?(Syntax::Expr::Variable)
             return Syntax::Expr::Assign.new(expr.name, value)
           elsif expr.is_a?(Lox::Syntax::Expr::Get)
             get = expr
             return Lox::Syntax::Expr::Set.new(get.object, get.name, value)
           end
+
           error(equals, 'Invalid assignment target.')
         end
         expr
@@ -321,6 +327,11 @@ module Lox
           return Syntax::Expr::Literal.new(nil)
         elsif match(Lox::Lexical::TokenType::NUMBER, Lox::Lexical::TokenType::STRING)
           return Syntax::Expr::Literal.new(previous.literal)
+        elsif match(Lox::Lexical::TokenType::SUPER)
+          keyword = previous
+          consume(Lox::Lexical::TokenType::DOT, "Expect '.' after 'super'.")
+          method = consume(Lox::Lexical::TokenType::IDENTIFIER, 'Expect superclass method name.')
+          return Lox::Syntax::Expr::Super.new(keyword, method)
         elsif match(Lox::Lexical::TokenType::THIS)
           return Syntax::Expr::This.new(previous)
         elsif match(Lox::Lexical::TokenType::IDENTIFIER)

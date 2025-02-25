@@ -15,7 +15,8 @@ module Spec
       analyzer = Lox::Lexical::Analyzer.new(source)
       tokens = analyzer.scan_tokens
       token_types = tokens.map(&:type)
-      expect(token_types).to include(Lox::Lexical::TokenType::PRINT, Lox::Lexical::TokenType::STRING, Lox::Lexical::TokenType::SEMICOLON)
+      expect(token_types).to include(Lox::Lexical::TokenType::PRINT, Lox::Lexical::TokenType::STRING,
+                                     Lox::Lexical::TokenType::SEMICOLON)
     end
 
     it 'scans tokens for nested blocks' do
@@ -24,7 +25,7 @@ module Spec
       tokens = analyzer.scan_tokens
       token_types = tokens.map(&:type)
       expect(token_types).to include(Lox::Lexical::TokenType::LEFT_BRACE, Lox::Lexical::TokenType::VAR, Lox::Lexical::TokenType::IDENTIFIER, Lox::Lexical::TokenType::NUMBER,
-      Lox::Lexical::TokenType::RIGHT_BRACE)
+                                     Lox::Lexical::TokenType::RIGHT_BRACE)
     end
   end
 end
