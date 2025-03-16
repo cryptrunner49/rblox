@@ -9,3 +9,7 @@ ruby '>= 3.3.6'
 gem 'readline'
 gem 'rspec'
 gem 'stringio'
+
+group :development, :test do
+  gem 'rspec'
+end
