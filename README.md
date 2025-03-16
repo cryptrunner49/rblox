@@ -1,5 +1,23 @@
 # Implementation of the Lox Language in Ruby
 
+## Running the REPL
+
+Requires Ruby version 3.3.6  
+
+Make sure Ruby 3.3.6 is installed before running the command below:
+
+```
+bundle install
+ruby src/lox/runner.rb
+```
+
+## Testing
+
+```
+bundle install
+bundle exec rspec
+```
+
 ## Project Structure
 
 ```ruby
