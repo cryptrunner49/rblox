@@ -12,7 +12,11 @@ require_relative 'runtime_error'
 module Lox
   module Interpreter
     class ExpressionEvaluator
-      # Class-level variable
+      # ======================================================================
+      # Section: Expression Evaluator Class
+      # Purpose: Contains methods for evaluating expressions and executing statements.
+      # ======================================================================
+
       GLOBALS = Lox::Interpreter::Environment.new.freeze
 
       attr_reader :globals

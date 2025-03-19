@@ -3,6 +3,11 @@
 module Lox
   module Interpreter
     module LoxCallable
+      # ======================================================================
+      # Section: LoxCallable Module
+      # Purpose: Contains methods for defining callable objects.
+      # ======================================================================
+
       def arity
         raise NotImplementedError, "Classes including LoxCallable must implement 'arity'"
       end

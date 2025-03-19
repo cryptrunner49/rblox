@@ -6,6 +6,11 @@ require_relative 'environment'
 module Lox
   module Interpreter
     class LoxFunction
+      # ======================================================================
+      # Section: LoxFunction Class
+      # Purpose: Contains methods for defining and managing Lox functions.
+      # ======================================================================
+
       include Lox::Interpreter::LoxCallable
 
       def initialize(declaration, closure, is_initializer)
@@ -42,7 +47,7 @@ module Lox
           e.value # Return the value from the Return exception
         end
 
-        return closure[0, 'this'] if @is_initializer
+        return closure.get_at(0, 'this') if @is_initializer
 
         nil
       end

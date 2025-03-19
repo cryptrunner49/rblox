@@ -6,6 +6,11 @@ require_relative '../src/lox/interpreter/lox_callable'
 
 module Spec
   RSpec.describe Lox::Interpreter::LoxCallable do
+    # ======================================================================
+    # Section: LoxCallable Tests
+    # Purpose: Contains tests to verify the functionality of LoxCallable.
+    # ======================================================================
+
     let(:callable_class) do
       Class.new do
         include Lox::Interpreter::LoxCallable
@@ -23,9 +28,9 @@ module Spec
       instance = callable_class.new
       expect do
         instance.call(nil,
-                      [])
+                       [])
       end.to raise_error(NotImplementedError,
-                         "Classes including LoxCallable must implement 'call(interpreter, arguments)'")
+                          "Classes including LoxCallable must implement 'call(interpreter, arguments)'")
     end
   end
 end

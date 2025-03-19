@@ -7,6 +7,11 @@ require_relative 'lox_function'
 module Lox
   module Interpreter
     class LoxClass
+      # ======================================================================
+      # Section: LoxClass Class
+      # Purpose: Contains methods for defining and managing Lox classes.
+      # ======================================================================
+
       include Lox::Interpreter::LoxCallable
 
       def initialize(name, superclass, methods = {})

@@ -8,6 +8,11 @@ require_relative '../src/lox/lexical/token_type'
 
 module Spec
   RSpec.describe Lox::Interpreter::Environment do
+    # ======================================================================
+    # Section: Environment Tests
+    # Purpose: Contains tests to verify the functionality of the environment.
+    # ======================================================================
+
     let(:env) { Lox::Interpreter::Environment.new }
     let(:token) { Lox::Lexical::Token.new(Lox::Lexical::TokenType::IDENTIFIER, 'x', nil, 1) }
 

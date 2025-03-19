@@ -13,12 +13,17 @@ require_relative '../src/lox/lexical/token_type'
 
 module Spec
   RSpec.describe Lox::Interpreter::LoxInstance do
+    # ======================================================================
+    # Section: LoxInstance Tests
+    # Purpose: Contains tests to verify the functionality of LoxInstance.
+    # ======================================================================
+
     let(:evaluator) { Lox::Interpreter::ExpressionEvaluator.new }
     let(:class_name) { Lox::Lexical::Token.new(Lox::Lexical::TokenType::IDENTIFIER, 'MyClass', nil, 1) }
     let(:method_token) { Lox::Lexical::Token.new(Lox::Lexical::TokenType::IDENTIFIER, 'say', nil, 1) }
     let(:method_stmt) do
       Lox::Syntax::Stmt::Function.new(method_token, [],
-                                      [Lox::Syntax::Stmt::Print.new(Lox::Syntax::Expr::Literal.new('Hello'))])
+                                       [Lox::Syntax::Stmt::Print.new(Lox::Syntax::Expr::Literal.new('Hello'))])
     end
     let(:methods) { { 'say' => Lox::Interpreter::LoxFunction.new(method_stmt, evaluator.globals, false) } }
     let(:klass) { Lox::Interpreter::LoxClass.new('MyClass', nil, methods) }

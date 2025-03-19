@@ -10,6 +10,11 @@ require_relative '../src/lox/lexical/analyzer'
 
 module Spec
   describe 'Inheritance' do
+    # ======================================================================
+    # Section: Inheritance Tests
+    # Purpose: Contains tests to verify the functionality of inheritance.
+    # ======================================================================
+
     let(:interpreter) { Lox::Interpreter::ExpressionEvaluator.new }
     let(:output) { StringIO.new }
 

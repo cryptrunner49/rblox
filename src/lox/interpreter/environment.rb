@@ -5,6 +5,11 @@ require_relative 'runtime_error'
 module Lox
   module Interpreter
     class Environment
+      # ======================================================================
+      # Section: Environment Class
+      # Purpose: Contains methods for managing variables and their scopes.
+      # ======================================================================
+
       attr_reader :enclosing, :values
 
       def initialize(enclosing = nil)

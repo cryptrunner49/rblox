@@ -7,6 +7,11 @@ require_relative '../src/lox/runner'
 
 module Spec
   RSpec.describe Lox::Runner do
+    # ======================================================================
+    # Section: Interpreter Tests
+    # Purpose: Contains tests to verify the functionality of the interpreter.
+    # ======================================================================
+
     def capture_stdout
       original_stdout = $stdout
       $stdout = StringIO.new

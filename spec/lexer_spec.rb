@@ -10,6 +10,11 @@ require_relative '../src/lox/lexical/token_type'
 
 module Spec
   RSpec.describe Lox::Lexical::Analyzer do
+    # ======================================================================
+    # Section: Lexer Tests
+    # Purpose: Contains tests to verify the functionality of the lexer.
+    # ======================================================================
+
     it 'scans tokens for a simple print statement with a string literal' do
       source = 'print "Hello";'
       analyzer = Lox::Lexical::Analyzer.new(source)

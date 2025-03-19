@@ -3,6 +3,11 @@
 module Lox
   module Interpreter
     class LoxInstance
+      # ======================================================================
+      # Section: LoxInstance Class
+      # Purpose: Contains methods for managing instances of Lox classes.
+      # ======================================================================
+
       def initialize(klass)
         @klass = klass
         @fields = {}

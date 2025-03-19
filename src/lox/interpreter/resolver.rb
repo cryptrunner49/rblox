@@ -7,6 +7,11 @@ require_relative '../syntax/stmt'
 module Lox
   module Interpreter
     class Resolver
+      # ======================================================================
+      # Section: Resolver Class
+      # Purpose: Contains methods for resolving variable references.
+      # ======================================================================
+
       FUNCTION_TYPES = {
         none: :none,
         function: :function,
@@ -255,7 +260,7 @@ module Lox
       end
 
       def visit_this_expr(expr)
-        if @current_class == :NONE
+        if @current_class == :none
           # Replace the Lox.error call with an exception
           raise Lox::Interpreter::RuntimeError.new(
             expr.keyword,
