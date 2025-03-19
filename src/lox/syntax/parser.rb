@@ -11,6 +11,11 @@ require_relative 'stmt'
 module Lox
   module Syntax
     class Parser
+      # ======================================================================
+      # Section: Parser Class
+      # Purpose: Contains methods to parse Lox code into an Abstract Syntax Tree (AST).
+      # ======================================================================
+
       class ParseError < StandardError; end
 
       def initialize(tokens)

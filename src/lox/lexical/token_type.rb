@@ -3,6 +3,11 @@
 module Lox
   module Lexical
     module TokenType
+      # ======================================================================
+      # Section: Token Types
+      # Purpose: Contains constants representing different types of tokens.
+      # ======================================================================
+
       # Single-character tokens
       LEFT_PAREN = :LEFT_PAREN
       RIGHT_PAREN = :RIGHT_PAREN

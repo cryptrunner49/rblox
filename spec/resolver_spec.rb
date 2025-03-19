@@ -11,6 +11,11 @@ require_relative '../src/lox/lexical/token_type'
 
 module Spec
   RSpec.describe Lox::Interpreter::Resolver do
+    # ======================================================================
+    # Section: Resolver Tests
+    # Purpose: Contains tests to verify the functionality of the resolver.
+    # ======================================================================
+
     let(:evaluator) { Lox::Interpreter::ExpressionEvaluator.new }
     let(:resolver) { Lox::Interpreter::Resolver.new(evaluator) }
     let(:token) { Lox::Lexical::Token.new(Lox::Lexical::TokenType::IDENTIFIER, 'x', nil, 1) }

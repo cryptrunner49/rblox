@@ -3,6 +3,11 @@
 module Lox
   module Lexical
     class Token
+      # ======================================================================
+      # Section: Token Class
+      # Purpose: Contains attributes and methods for representing a token.
+      # ======================================================================
+
       attr_reader :type, :lexeme, :literal, :line
 
       def initialize(type, lexeme, literal, line)

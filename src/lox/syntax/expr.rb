@@ -7,241 +7,249 @@ require_relative '../lexical/token'
 module Lox
   module Syntax
     class Expr
-    module Visitor
-      def visit_assign_expr(expr)
-        raise NotImplementedError, "Must implement visit_assign_expr"
-      end
+      # ======================================================================
+      # Section: Expression Visitor
+      # Purpose: Contains methods for visiting different types of expressions.
+      # ======================================================================
 
-      def visit_binary_expr(expr)
-        raise NotImplementedError, "Must implement visit_binary_expr"
-      end
+      module Visitor
+        def visit_assign_expr(expr)
+          raise NotImplementedError, "Must implement visit_assign_expr"
+        end
 
-      def visit_call_expr(expr)
-        raise NotImplementedError, "Must implement visit_call_expr"
-      end
+        def visit_binary_expr(expr)
+          raise NotImplementedError, "Must implement visit_binary_expr"
+        end
 
-      def visit_get_expr(expr)
-        raise NotImplementedError, "Must implement visit_get_expr"
-      end
+        def visit_call_expr(expr)
+          raise NotImplementedError, "Must implement visit_call_expr"
+        end
 
-      def visit_grouping_expr(expr)
-        raise NotImplementedError, "Must implement visit_grouping_expr"
-      end
+        def visit_get_expr(expr)
+          raise NotImplementedError, "Must implement visit_get_expr"
+        end
 
-      def visit_literal_expr(expr)
-        raise NotImplementedError, "Must implement visit_literal_expr"
-      end
+        def visit_grouping_expr(expr)
+          raise NotImplementedError, "Must implement visit_grouping_expr"
+        end
 
-      def visit_logical_expr(expr)
-        raise NotImplementedError, "Must implement visit_logical_expr"
-      end
+        def visit_literal_expr(expr)
+          raise NotImplementedError, "Must implement visit_literal_expr"
+        end
 
-      def visit_set_expr(expr)
-        raise NotImplementedError, "Must implement visit_set_expr"
-      end
+        def visit_logical_expr(expr)
+          raise NotImplementedError, "Must implement visit_logical_expr"
+        end
 
-      def visit_super_expr(expr)
-        raise NotImplementedError, "Must implement visit_super_expr"
-      end
+        def visit_set_expr(expr)
+          raise NotImplementedError, "Must implement visit_set_expr"
+        end
 
-      def visit_this_expr(expr)
-        raise NotImplementedError, "Must implement visit_this_expr"
-      end
+        def visit_super_expr(expr)
+          raise NotImplementedError, "Must implement visit_super_expr"
+        end
 
-      def visit_unary_expr(expr)
-        raise NotImplementedError, "Must implement visit_unary_expr"
-      end
+        def visit_this_expr(expr)
+          raise NotImplementedError, "Must implement visit_this_expr"
+        end
 
-      def visit_variable_expr(expr)
-        raise NotImplementedError, "Must implement visit_variable_expr"
-      end
+        def visit_unary_expr(expr)
+          raise NotImplementedError, "Must implement visit_unary_expr"
+        end
 
-    end
+        def visit_variable_expr(expr)
+          raise NotImplementedError, "Must implement visit_variable_expr"
+        end
+      end
 
       def accept(visitor)
         raise NotImplementedError, "Subclasses must implement accept"
       end
 
-    class Assign < Expr
-      # @name : Token
-      # @value : Expr
-      attr_reader :name, :value
+      # ======================================================================
+      # Section: Expression Classes
+      # Purpose: Contains classes for different types of expressions.
+      # ======================================================================
 
-      def initialize(name, value)
-        @name = name
-        @value = value
+      class Assign < Expr
+        # @name : Token
+        # @value : Expr
+        attr_reader :name, :value
+
+        def initialize(name, value)
+          @name = name
+          @value = value
+        end
+
+        def accept(visitor)
+          visitor.visit_assign_expr(self)
+        end
       end
 
-      def accept(visitor)
-        visitor.visit_assign_expr(self)
-      end
-    end
+      class Binary < Expr
+        # @left : Expr
+        # @operator : Token
+        # @right : Expr
+        attr_reader :left, :operator, :right
 
-    class Binary < Expr
-      # @left : Expr
-      # @operator : Token
-      # @right : Expr
-      attr_reader :left, :operator, :right
+        def initialize(left, operator, right)
+          @left = left
+          @operator = operator
+          @right = right
+        end
 
-      def initialize(left, operator, right)
-        @left = left
-        @operator = operator
-        @right = right
-      end
-
-      def accept(visitor)
-        visitor.visit_binary_expr(self)
-      end
-    end
-
-    class Call < Expr
-      # @callee : Expr
-      # @paren : Token
-      # @arguments : Expr[]
-      attr_reader :callee, :paren, :arguments
-
-      def initialize(callee, paren, arguments)
-        @callee = callee
-        @paren = paren
-        @arguments = arguments
+        def accept(visitor)
+          visitor.visit_binary_expr(self)
+        end
       end
 
-      def accept(visitor)
-        visitor.visit_call_expr(self)
-      end
-    end
+      class Call < Expr
+        # @callee : Expr
+        # @paren : Token
+        # @arguments : Expr[]
+        attr_reader :callee, :paren, :arguments
 
-    class Get < Expr
-      # @object : Expr
-      # @name : Token
-      attr_reader :object, :name
+        def initialize(callee, paren, arguments)
+          @callee = callee
+          @paren = paren
+          @arguments = arguments
+        end
 
-      def initialize(object, name)
-        @object = object
-        @name = name
-      end
-
-      def accept(visitor)
-        visitor.visit_get_expr(self)
-      end
-    end
-
-    class Grouping < Expr
-      # @expression : Expr
-      attr_reader :expression
-
-      def initialize(expression)
-        @expression = expression
+        def accept(visitor)
+          visitor.visit_call_expr(self)
+        end
       end
 
-      def accept(visitor)
-        visitor.visit_grouping_expr(self)
-      end
-    end
+      class Get < Expr
+        # @object : Expr
+        # @name : Token
+        attr_reader :object, :name
 
-    class Literal < Expr
-      # @value : Object
-      attr_reader :value
+        def initialize(object, name)
+          @object = object
+          @name = name
+        end
 
-      def initialize(value)
-        @value = value
-      end
-
-      def accept(visitor)
-        visitor.visit_literal_expr(self)
-      end
-    end
-
-    class Logical < Expr
-      # @left : Expr
-      # @operator : Token
-      # @right : Expr
-      attr_reader :left, :operator, :right
-
-      def initialize(left, operator, right)
-        @left = left
-        @operator = operator
-        @right = right
+        def accept(visitor)
+          visitor.visit_get_expr(self)
+        end
       end
 
-      def accept(visitor)
-        visitor.visit_logical_expr(self)
-      end
-    end
+      class Grouping < Expr
+        # @expression : Expr
+        attr_reader :expression
 
-    class Set < Expr
-      # @object : Expr
-      # @name : Token
-      # @value : Expr
-      attr_reader :object, :name, :value
+        def initialize(expression)
+          @expression = expression
+        end
 
-      def initialize(object, name, value)
-        @object = object
-        @name = name
-        @value = value
+        def accept(visitor)
+          visitor.visit_grouping_expr(self)
+        end
       end
 
-      def accept(visitor)
-        visitor.visit_set_expr(self)
-      end
-    end
+      class Literal < Expr
+        # @value : Object
+        attr_reader :value
 
-    class Super < Expr
-      # @keyword : Token
-      # @method : Token
-      attr_reader :keyword, :method
+        def initialize(value)
+          @value = value
+        end
 
-      def initialize(keyword, method)
-        @keyword = keyword
-        @method = method
+        def accept(visitor)
+          visitor.visit_literal_expr(self)
+        end
       end
 
-      def accept(visitor)
-        visitor.visit_super_expr(self)
-      end
-    end
+      class Logical < Expr
+        # @left : Expr
+        # @operator : Token
+        # @right : Expr
+        attr_reader :left, :operator, :right
 
-    class This < Expr
-      # @keyword : Token
-      attr_reader :keyword
+        def initialize(left, operator, right)
+          @left = left
+          @operator = operator
+          @right = right
+        end
 
-      def initialize(keyword)
-        @keyword = keyword
-      end
-
-      def accept(visitor)
-        visitor.visit_this_expr(self)
-      end
-    end
-
-    class Unary < Expr
-      # @operator : Token
-      # @right : Expr
-      attr_reader :operator, :right
-
-      def initialize(operator, right)
-        @operator = operator
-        @right = right
+        def accept(visitor)
+          visitor.visit_logical_expr(self)
+        end
       end
 
-      def accept(visitor)
-        visitor.visit_unary_expr(self)
+      class Set < Expr
+        # @object : Expr
+        # @name : Token
+        # @value : Expr
+        attr_reader :object, :name, :value
+
+        def initialize(object, name, value)
+          @object = object
+          @name = name
+          @value = value
+        end
+
+        def accept(visitor)
+          visitor.visit_set_expr(self)
+        end
       end
-    end
 
-    class Variable < Expr
-      # @name : Token
-      attr_reader :name
+      class Super < Expr
+        # @keyword : Token
+        # @method : Token
+        attr_reader :keyword, :method
 
-      def initialize(name)
-        @name = name
+        def initialize(keyword, method)
+          @keyword = keyword
+          @method = method
+        end
+
+        def accept(visitor)
+          visitor.visit_super_expr(self)
+        end
       end
 
-      def accept(visitor)
-        visitor.visit_variable_expr(self)
-      end
-    end
+      class This < Expr
+        # @keyword : Token
+        attr_reader :keyword
 
+        def initialize(keyword)
+          @keyword = keyword
+        end
+
+        def accept(visitor)
+          visitor.visit_this_expr(self)
+        end
+      end
+
+      class Unary < Expr
+        # @operator : Token
+        # @right : Expr
+        attr_reader :operator, :right
+
+        def initialize(operator, right)
+          @operator = operator
+          @right = right
+        end
+
+        def accept(visitor)
+          visitor.visit_unary_expr(self)
+        end
+      end
+
+      class Variable < Expr
+        # @name : Token
+        attr_reader :name
+
+        def initialize(name)
+          @name = name
+        end
+
+        def accept(visitor)
+          visitor.visit_variable_expr(self)
+        end
+      end
     end
   end
 end

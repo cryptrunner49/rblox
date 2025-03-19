@@ -7,6 +7,11 @@ require_relative '../../lox/runner'
 module Lox
   module Lexical
     class Analyzer
+      # ======================================================================
+      # Section: Lexical Analyzer
+      # Purpose: Contains methods to scan and tokenize Lox source code.
+      # ======================================================================
+
       attr_reader :source, :tokens
 
       KEYWORDS = {

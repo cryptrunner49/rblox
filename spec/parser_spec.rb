@@ -7,6 +7,11 @@ require_relative '../src/lox/syntax/parser'
 
 module Spec
   RSpec.describe Lox::Syntax::Parser do
+    # ======================================================================
+    # Section: Parser Tests
+    # Purpose: Contains tests to verify the functionality of the parser.
+    # ======================================================================
+
     def tokens_for(source)
       analyzer = Lox::Lexical::Analyzer.new(source)
       analyzer.scan_tokens
