@@ -1,13 +1,16 @@
 class MyClass {
-  init(value) {
-    this.value = value;
-  }
+    init(value) {
+        this.value = value;
+    }
 }
+
 var instance1 = MyClass(1);
 var instance2 = MyClass(2);
 var instance3 = MyClass(3);
+
 // Repeat instantiation for a reasonable benchmark load (e.g., 1000 instances would be too verbose)
 for (var i = 0; i < 100; i = i + 1) {
-  var temp = MyClass(i);
+    var temp = MyClass(i);
 }
+
 print instance2.value;  // Expected: 2

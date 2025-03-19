@@ -1,33 +1,33 @@
 // Basic class definition
 class Calculator {
-  init() {
+init() {
     this.result = 0;
-  }
+}
 
-  add(n) {
+add(n) {
     this.result = this.result + n;
-  }
+}
 
-  subtract(n) {
+subtract(n) {
     this.result = this.result - n;
-  }
+}
 
-  multiply(n) {
+multiply(n) {
     this.result = this.result * n;
-  }
+}
 
-  divide(n) {
+divide(n) {
     this.result = this.result / n;
-  }
+}
 
-  getResult() {
+getResult() {
     return this.result;
-  }
+}
 }
 
 // Function definition
 fun printLine() {
-  print "---------------";
+    print "---------------";
 }
 
 // Create calculator instance
@@ -58,21 +58,21 @@ printLine();
 // Demonstrate variables and control flow
 var count = 0;
 for (var i = 1; i < 5; i = i + 1) {
-  count = count + i;
-  print "Loop iteration:";
-  print i;
-  print "Running total:";
-  print count;
+    count = count + i;
+    print "Loop iteration:";
+    print i;
+    print "Running total:";
+    print count;
 }
 
 printLine();
 
 // Demonstrate class inheritance
 class SuperCalculator < Calculator {
-  square() {
-    var current = this.getResult();
-    this.result = current * current;
-  }
+    square() {
+        var current = this.getResult();
+        this.result = current * current;
+    }
 }
 
 var superCalc = SuperCalculator();
@@ -87,7 +87,7 @@ printLine();
 
 // Demonstrate if statements and comparison operators
 if (superCalc.getResult() > 10) {
-  print "Result is greater than 10";
+    print "Result is greater than 10";
 } else {
-  print "Result is not greater than 10";
+    print "Result is not greater than 10";
 }

@@ -1,13 +1,14 @@
 class Counter {
-  init() {
-    this.count = 0;
-  }
-  increment() {
-    this.count = this.count + 1;
-  }
+    init() {
+        this.count = 0;
+    }
+    increment() {
+        this.count = this.count + 1;
+    }
 }
 var c = Counter();
+
 for (var i = 0; i < 10000; i = i + 1) {
-  c.increment();
+    c.increment();
 }
 print c.count;  // Expected: 10000

@@ -1,17 +1,19 @@
 fun add(a, b) {
-  return a + b;
+    return a + b;
 }
+
 class Person {
-  init(name) {
-    this.name = name;
-  }
-  greet() {
-    print "Hello, " + this.name + "!";
-  }
+    init(name) {
+        this.name = name;
+    }
+    greet() {
+        print "Hello, " + this.name + "!";
+    }
 }
+
 var total = 0;
 for (var i = 0; i < 1000; i = i + 1) {
-  total = add(total, i);
+    total = add(total, i);
 }
 var p = Person("Alice");
 p.greet();

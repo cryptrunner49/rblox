@@ -1,25 +1,25 @@
 print "Hello"; var x = 5; print x;
 {
-  var x = "outer";
-  {
-    var x = "inner";
+    var x = "outer";
+    {
+        var x = "inner";
+        print x;
+    }
     print x;
-  }
-  print x;
 }
 
 print("while---");
 
 var w = 0;
 while (w < 5) {
-  w = w + 1;
-  print w;
+    w = w + 1;
+    print w;
 } 
 
 print("for---1");
 
 for (var a = 0; a <= 5; a = a + 1) {
-  print(a);
+    print(a);
 }
 
 print("for---2");
@@ -28,7 +28,7 @@ var a = 0;
 var temp;
 
 for (var b = 1; a < 100; b = temp + b) {
-  print a;
-  temp = a;
-  a = b;
+    print a;
+    temp = a;
+    a = b;
 }
