@@ -13,6 +13,11 @@ require_relative '../../generator/ast_printer'
 
 module Lox
   class Runner
+    # ======================================================================
+    # Section: Runner Class Methods
+    # Purpose: Contains methods to run Lox scripts from files or REPL.
+    # ======================================================================
+
     class << self
       attr_accessor :had_error, :had_runtime_error
 
@@ -22,13 +27,14 @@ module Lox
       EXIT_MESSAGE = "\nExiting rblox. Goodbye!".freeze unless defined?(EXIT_MESSAGE)
 
       def main(args)
-        if args.length > 1
+        case args.length
+        when 1
+          run_file(args[0])
+        when 0
+          run_prompt
+        else
           puts 'Usage: rblox [script]'
           exit(64)
-        elsif args.length == 1
-          run_file(args[0])
-        else
-          run_prompt
         end
       end
 
@@ -150,10 +156,8 @@ module Lox
       end
 
       def run(source)
-        # puts "Processing source: #{source}"
         analyzer = Lexical::Analyzer.new(source)
         tokens = analyzer.scan_tokens
-        # puts "Tokens: #{tokens.map(&:to_s)}"
 
         parser = Syntax::Parser.new(tokens)
         statements = parser.parse
@@ -163,9 +167,6 @@ module Lox
           @had_error = true
           return
         end
-
-        # puts 'Statements parsed:'
-        # statements.each { |stmt| puts Generator::AstPrinter.new.print(stmt) }
 
         # Use a persistent interpreter instance.
         @interpreter ||= Interpreter::ExpressionEvaluator.new
@@ -243,15 +244,13 @@ module Lox
         history = Readline::HISTORY.to_a.uniq.last(100)
         File.write(file, "#{history.join("\n")}\n")
       end
-
-      # def report(line, where, message)
-      #  source_line = @source.split("\n")[line - 1]
-      #  warn "[line #{line}] Error#{where}: #{message}"
-      #  warn "  #{source_line}"
-      #  warn "  " + (" " * (where.to_i - 1)) + "^"
-      # end
     end
   end
+
+  # ======================================================================
+  # Section: Syntax Highlighter
+  # Purpose: Contains methods to highlight Lox code syntax.
+  # ======================================================================
 
   module SyntaxHighlighter
     unless defined?(TOKEN_COLORS)

@@ -6,6 +6,11 @@ require_relative '../src/lox/utils/string_colors'
 
 module Spec
   RSpec.describe Lox::Utils::StringColors do
+    # ======================================================================
+    # Section: String Colorization Tests
+    # Purpose: Contains tests to verify the functionality of string colorization.
+    # ======================================================================
+
     describe String do
       it 'colors a string red' do
         expect('test'.red).to eq("\e[31mtest\e[0m")

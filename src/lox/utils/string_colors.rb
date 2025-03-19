@@ -3,6 +3,11 @@
 module Lox
   module Utils
     module StringColors
+      # ======================================================================
+      # Section: String Colorization
+      # Purpose: Contains methods to colorize strings for terminal output.
+      # ======================================================================
+
       COLORS = {
         black: "\e[30m",
         red: "\e[31m",
