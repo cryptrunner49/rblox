@@ -7,6 +7,11 @@ require_relative '../src/lox/lexical/analyzer'
 require_relative '../src/lox/syntax/parser'
 require_relative '../src/lox/interpreter/expression_evaluator'
 
+# ======================================================================
+# Section: Benchmarking Scripts
+# Purpose: Contains scripts to benchmark the performance of the Lox interpreter.
+# ======================================================================
+
 # Scripts to benchmark
 SCRIPTS = {
   'Loop Test' => 'scripts/loop_test.lox',

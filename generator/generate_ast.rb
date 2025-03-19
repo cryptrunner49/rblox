@@ -3,6 +3,11 @@
 
 module Generator
   class GenerateAst
+    # ======================================================================
+    # Section: AST Generation Methods
+    # Purpose: Contains methods to generate the Abstract Syntax Tree (AST) classes.
+    # ======================================================================
+
     def self.main
       # Default path is project_root/src/lox/syntax/
       output_dir = ARGV[0] || File.join(__dir__, '..', 'src', 'lox', 'syntax')

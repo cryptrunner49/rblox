@@ -6,6 +6,11 @@ require_relative '../src/lox/syntax/expr'
 
 module Generator
   class AstPrinter
+    # ======================================================================
+    # Section: AST Printing Methods
+    # Purpose: Contains methods to print the Abstract Syntax Tree (AST) nodes.
+    # ======================================================================
+
     def print(node)
       return unless node
 
@@ -71,6 +76,11 @@ module Generator
     end
   end
 end
+
+# ======================================================================
+# Section: Testing AST Printer
+# Purpose: Contains test cases to verify the functionality of the AST printer.
+# ======================================================================
 
 if __FILE__ == $PROGRAM_NAME
   # Test Expr

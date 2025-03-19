@@ -2,6 +2,11 @@
 
 source 'https://rubygems.org'
 
+# ======================================================================
+# Section: Ruby Version and Dependencies
+# Purpose: Specifies the Ruby version and the required gems for the project.
+# ======================================================================
+
 # Ruby version
 ruby '>= 3.3.6'
 
